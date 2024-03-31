@@ -7,4 +7,4 @@ from axe.base import Editor
 if len(sys.argv) > 1:
     Editor(sys.argv[1])
 else:
-    Editor('')
+    Editor("")

@@ -1,14 +1,17 @@
 """aangepaste versie van tree-based XML-editor, bedoeld als read-only en een
 ietsje verder platgeslagen weergave
 """
+
 import os
 import sys
+
 ## import functools
 import PyQt5.QtWidgets as qtw
 import PyQt5.QtGui as gui
 import PyQt5.QtCore as core
 from .axe_base import getshortname, find_next, log, TITEL, axe_iconame, AxeMixin
-TITEL = TITEL.replace('editor', 'viewer')
+
+TITEL = TITEL.replace("editor", "viewer")
 if os.name == "nt":
     HMASK = "XML files (*.xml);;All files (*.*)"
 elif os.name == "posix":
@@ -36,9 +39,11 @@ def flatten_tree(element):
     """
     itemdict = element.data(0, core.Qt.UserRole)
     if itemdict:
-        elem_list = [(element, itemdict['tag'], itemdict['text'] or '', itemdict['attrs'])]
+        elem_list = [
+            (element, itemdict["tag"], itemdict["text"] or "", itemdict["attrs"])
+        ]
     else:
-        elem_list = [(element, '', '', [])]
+        elem_list = [(element, "", "", [])]
     subel_list = []
     for seq in range(element.childCount()):
         subitem = element.child(seq)
@@ -49,19 +54,19 @@ def flatten_tree(element):
 
 # Dialog windows
 class SearchDialog(qtw.QDialog):
-    """Dialog to get search arguments
-    """
+    """Dialog to get search arguments"""
+
     def __init__(self, parent, title=""):
         super().__init__(parent)
         self.setWindowTitle(title)
         self._parent = parent
 
-        self.cb_element = qtw.QLabel('Element', self)
+        self.cb_element = qtw.QLabel("Element", self)
         lbl_element = qtw.QLabel("name:", self)
         self.txt_element = qtw.QLineEdit(self)
         self.txt_element.textChanged.connect(self.set_search)
 
-        self.cb_attr = qtw.QLabel('Attribute', self)
+        self.cb_attr = qtw.QLabel("Attribute", self)
         lbl_attr_name = qtw.QLabel("name:", self)
         self.txt_attr_name = qtw.QLineEdit(self)
         self.txt_attr_name.textChanged.connect(self.set_search)
@@ -69,17 +74,17 @@ class SearchDialog(qtw.QDialog):
         self.txt_attr_val = qtw.QLineEdit(self)
         self.txt_attr_val.textChanged.connect(self.set_search)
 
-        self.cb_text = qtw.QLabel('Text', self)
+        self.cb_text = qtw.QLabel("Text", self)
         lbl_text = qtw.QLabel("value:", self)
         self.txt_text = qtw.QLineEdit(self)
         self.txt_text.textChanged.connect(self.set_search)
 
-        self.lbl_search = qtw.QLabel('', self)
+        self.lbl_search = qtw.QLabel("", self)
 
-        self.btn_ok = qtw.QPushButton('&Ok', self)
+        self.btn_ok = qtw.QPushButton("&Ok", self)
         self.btn_ok.clicked.connect(self.accept)
         self.btn_ok.setDefault(True)
-        self.btn_cancel = qtw.QPushButton('&Cancel', self)
+        self.btn_cancel = qtw.QPushButton("&Cancel", self)
         self.btn_cancel.clicked.connect(self.reject)
 
         sizer = qtw.QVBoxLayout()
@@ -132,36 +137,36 @@ class SearchDialog(qtw.QDialog):
 
     def set_search(self):
         """build text describing search action"""
-        out = ''
+        out = ""
         ele = self.txt_element.text()
         attr_name = self.txt_attr_name.text()
         attr_val = self.txt_attr_val.text()
         text = self.txt_text.text()
-        attr = ''
+        attr = ""
         if ele:
-            ele = ' an element named `{}`'.format(ele)
+            ele = " an element named `{}`".format(ele)
         if attr_name or attr_val:
-            attr = ' an attribute'
+            attr = " an attribute"
             if attr_name:
-                attr += ' named `{}`'.format(attr_name)
+                attr += " named `{}`".format(attr_name)
             if attr_val:
-                attr += ' that has value `{}`'.format(attr_val)
+                attr += " that has value `{}`".format(attr_val)
             if ele:
-                attr = ' with' + attr
+                attr = " with" + attr
         if text:
-            out = 'search for text'
+            out = "search for text"
             if ele:
-                out += ' under' + ele
+                out += " under" + ele
             elif attr:
-                out += ' under an element with'
+                out += " under an element with"
             if attr:
                 out += attr
         elif ele:
-            out = 'search for' + ele
+            out = "search for" + ele
             if attr:
                 out += attr
         elif attr:
-            out = 'search for' + attr
+            out = "search for" + attr
         self.lbl_search.setText(out)
 
     def accept(self):
@@ -171,7 +176,7 @@ class SearchDialog(qtw.QDialog):
         attr_val = str(self.txt_attr_val.text())
         text = str(self.txt_text.text())
         if not any((ele, attr_name, attr_val, text)):
-            self._parent._meldfout('Please enter search criteria or press cancel')
+            self._parent._meldfout("Please enter search criteria or press cancel")
             self.txt_element.setFocus()
             return
 
@@ -179,12 +184,12 @@ class SearchDialog(qtw.QDialog):
         super().accept()
 
     ## def on_cancel(self):
-        ## super().done(qtw.QDialog.Rejected)
+    ## super().done(qtw.QDialog.Rejected)
 
 
 class VisualTree(qtw.QTreeWidget):
-    """Tree widget subclass overriding some event handlers
-    """
+    """Tree widget subclass overriding some event handlers"""
+
     def __init__(self, parent):
         self.parent = parent
         super().__init__()
@@ -199,8 +204,8 @@ class VisualTree(qtw.QTreeWidget):
                 ## data = str(item.text(0))
                 edit = True
                 ## if data.startswith(ELSTART):
-                    ## if item.childCount() > 0:
-                        ## edit = False
+                ## if item.childCount() > 0:
+                ## edit = False
         if edit:
             self.parent.edit()
         else:
@@ -222,9 +227,9 @@ class VisualTree(qtw.QTreeWidget):
 
 
 class MainFrame(qtw.QMainWindow, AxeMixin):
-    """Main application window
-    """
-    def __init__(self, fn=''):
+    """Main application window"""
+
+    def __init__(self, fn=""):
         self.fn = fn
         super().__init__()
         self.show()
@@ -234,8 +239,9 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
     def openxml(self, ev=None):
         AxeMixin.openxml(self, skip_check=True)
 
-    def init_tree(self, root, prefixes=None, uris=None, name=''):
+    def init_tree(self, root, prefixes=None, uris=None, name=""):
         "set up display tree"
+
         def add_to_tree(el, rt):
             "recursively add elements"
             self.item = rt
@@ -262,11 +268,11 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         namespaces = False
         for ix, prf in enumerate(self.ns_prefixes):
             if not namespaces:
-                ns_root = qtw.QTreeWidgetItem(['namespaces'])
+                ns_root = qtw.QTreeWidgetItem(["namespaces"])
                 self.top.addChild(ns_root)
                 namespaces = True
             ns_item = qtw.QTreeWidgetItem()
-            ns_item.setText(0, '{}: {}'.format(prf, self.ns_uris[ix]))
+            ns_item.setText(0, "{}: {}".format(prf, self.ns_uris[ix]))
             ns_root.addChild(ns_item)
         self.item = self.top
         rt = self._add_item(self.rt)
@@ -275,8 +281,7 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
 
     # internals
     def _init_gui(self):
-        """Deze methode wordt aangeroepen door de __init__ van de mixin class
-        """
+        """Deze methode wordt aangeroepen door de __init__ van de mixin class"""
         ## self.parent = parent
         ## qtw.QMainWindow.__init__(self, parent) # aparte initialisatie net als voor mixin
         self._icon = gui.QIcon(axe_iconame)
@@ -284,7 +289,7 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         self.setWindowIcon(self._icon)
 
         self.statusbar = self.statusBar()
-        self.statusbar.showMessage('Ready')
+        self.statusbar.showMessage("Ready")
 
         self._init_menus()
 
@@ -300,26 +305,29 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         else:
             self.filemenu_actions, self.viewmenu_actions = [], []
             self.editmenu_actions, self.searchmenu_actions = [], []
-            for ix, menudata in enumerate((
+            for ix, menudata in enumerate(
+                (
                     (
-                        ("&Open", self.openxml, 'Ctrl+O'),
-                        ('E&xit', self.quit, 'Ctrl+Q'),
+                        ("&Open", self.openxml, "Ctrl+O"),
+                        ("E&xit", self.quit, "Ctrl+Q"),
                     ),
                     (
-                        ("&Expand All (sub)Levels", self.expand, 'Ctrl++'),
-                        ("&Collapse All (sub)Levels", self.collapse, 'Ctrl+-'),
+                        ("&Expand All (sub)Levels", self.expand, "Ctrl++"),
+                        ("&Collapse All (sub)Levels", self.collapse, "Ctrl+-"),
                     ),
                     (
-                        ("&Find", self.search, 'Ctrl+F'),
-                        ("Find &Last", self.search_last, 'Shift+Ctrl+F'),
-                        ("Find &Next", self.search_next, 'F3'),
-                        ("Find &Previous", self.search_prev, 'Shift+F3'),
-                    ))):
+                        ("&Find", self.search, "Ctrl+F"),
+                        ("Find &Last", self.search_last, "Shift+Ctrl+F"),
+                        ("Find &Next", self.search_next, "F3"),
+                        ("Find &Previous", self.search_prev, "Shift+F3"),
+                    ),
+                )
+            ):
                 for text, callback, shortcuts in menudata:
                     act = qtw.QAction(text, self)
                     act.triggered.connect(callback)
                     if shortcuts:
-                        act.setShortcuts([x for x in shortcuts.split(',')])
+                        act.setShortcuts([x for x in shortcuts.split(",")])
                     if ix == 0:
                         self.filemenu_actions.append(act)
                     elif ix == 1:
@@ -347,7 +355,7 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         if popup:
             return searchmenu
         ## else:
-            ## return filemenu, viewmenu, editmenu
+        ## return filemenu, viewmenu, editmenu
 
     def _meldinfo(self, text):
         """notify about some information"""
@@ -365,26 +373,35 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         """stelt een vraag en retourneert het antwoord
         1 = Yes, 0 = No, -1 = Cancel
         """
-        retval = dict(zip((qtw.QMessageBox.Yes, qtw.QMessageBox.No,
-                           qtw.QMessageBox.Cancel), (1, 0, -1)))
+        retval = dict(
+            zip(
+                (qtw.QMessageBox.Yes, qtw.QMessageBox.No, qtw.QMessageBox.Cancel),
+                (1, 0, -1),
+            )
+        )
         self.in_dialog = True
         h = qtw.QMessageBox.question(
-            self, self.title, prompt,
+            self,
+            self.title,
+            prompt,
             qtw.QMessageBox.Yes | qtw.QMessageBox.No | qtw.QMessageBox.Cancel,
-            defaultButton=qtw.QMessageBox.Yes)
+            defaultButton=qtw.QMessageBox.Yes,
+        )
         return retval[h]
 
     def _ask_for_text(self, prompt):
         """vraagt om tekst en retourneert het antwoord"""
         self.in_dialog = True
-        data, *_ = qtw.QInputDialog.getText(self, self.title, prompt,
-                                            qtw.QLineEdit.Normal, "")
+        data, *_ = qtw.QInputDialog.getText(
+            self, self.title, prompt, qtw.QLineEdit.Normal, ""
+        )
         return data
 
     def _file_to_read(self):
         """ask for file to load"""
-        fnaam, *_ = qtw.QFileDialog.getOpenFileName(self, "Choose a file",
-                                                    os.getcwd(), HMASK)
+        fnaam, *_ = qtw.QFileDialog.getOpenFileName(
+            self, "Choose a file", os.getcwd(), HMASK
+        )
         ok = bool(fnaam)
         return ok, str(fnaam)
 
@@ -398,7 +415,7 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         self.item = self.tree.currentItem()
         log("in checkselection: self.item {}".format(self.item))
         if message and (self.item is None or self.item == self.top):
-            self._meldinfo('You need to select an element or attribute first')
+            self._meldinfo("You need to select an element or attribute first")
             sel = False
         return sel
 
@@ -406,7 +423,7 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         """execute adding of item"""
         name, value, attrs = element.tag, element.text, element.items()
         itemdict = {"tag": name, "text": value, "attrs": attrs}
-        log('in _add_item for {} value {} attrs {}'.format(name, value, attrs))
+        log("in _add_item for {} value {} attrs {}".format(name, value, attrs))
         if value is None:
             value = ""
         itemtext = getshortname(((name, value), self.ns_prefixes, self.ns_uris))
@@ -414,18 +431,19 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         new.setText(0, itemtext)
         new.setData(0, core.Qt.UserRole, itemdict)
         tooltiptext = value
-        if itemdict['attrs']:
-            tooltiptext += '\n--------------------\n' + '\n'.join(
-                ["{}: {}".format(x, y) for x, y in sorted(itemdict['attrs'])])
+        if itemdict["attrs"]:
+            tooltiptext += "\n--------------------\n" + "\n".join(
+                ["{}: {}".format(x, y) for x, y in sorted(itemdict["attrs"])]
+            )
         new.setToolTip(0, tooltiptext)
-        log('add under {}'.format(self.item))
+        log("add under {}".format(self.item))
         self.item.addChild(new)
         return new
 
     # exposed
     def popupmenu(self, item):
         """call up menu"""
-        log('self.popupmenu called')
+        log("self.popupmenu called")
         menu = self._init_menus(popup=True)
         menu.exec_(self.tree.mapToGlobal(self.tree.visualItemRect(item).bottomRight()))
 
@@ -451,7 +469,7 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
                             self.tree.expandItem(item)
                             self.tree.setCurrentItem(item.child(0))
                     ## else:
-                        ## self.edit()
+                    ## self.edit()
                 skip = True
             elif ky == core.Qt.Key_Backspace:
                 if item.isExpanded():
@@ -465,11 +483,13 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
 
     def expand(self):
         "expand a tree item"
+
         def expand_with_children(item):
             "do it recursively"
             self.tree.expandItem(item)
             for ix in range(item.childCount()):
                 expand_with_children(item.child(ix))
+
         item = self.tree.currentItem()
         if item:
             expand_with_children(item)
@@ -479,20 +499,22 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         "collapse tree item"
         item = self.tree.currentItem()
         if item:
-            self.tree.collapseItem(item)    # mag eventueel recursief in overeenstemming met vorige
+            self.tree.collapseItem(
+                item
+            )  # mag eventueel recursief in overeenstemming met vorige
             self.tree.resizeColumnToContents(0)
 
     def search(self, reverse=False):
         "start search after asking for options"
         self._search_pos = None
-        edt = SearchDialog(self, title='Search options').exec_()
+        edt = SearchDialog(self, title="Search options").exec_()
         if edt == qtw.QDialog.Accepted:
             self.search_next(reverse)
             ## found, is_attr = find_next(flatten_tree(self.top), self.search_args,
-                ## reversed) # self.tree.top.child(0)
+            ## reversed) # self.tree.top.child(0)
             ## if found:
-                ## self.tree.setCurrentItem(found)
-                ## self._search_pos = (found, is_attr)
+            ## self.tree.setCurrentItem(found)
+            ## self._search_pos = (found, is_attr)
 
     def search_last(self):
         "start backwards search"
@@ -500,13 +522,14 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
 
     def search_next(self, reverse=False):
         "find (default is forward)"
-        found, is_attr = find_next(flatten_tree(self.top), self.search_args,
-                                   reverse, self._search_pos)  # self.tree.top.child(0)
+        found, is_attr = find_next(
+            flatten_tree(self.top), self.search_args, reverse, self._search_pos
+        )  # self.tree.top.child(0)
         if found:
             self.tree.setCurrentItem(found)
             self._search_pos = (found, is_attr)
         else:
-            self._meldinfo('Niks (meer) gevonden')
+            self._meldinfo("Niks (meer) gevonden")
 
     def search_prev(self):
         "find backwards"

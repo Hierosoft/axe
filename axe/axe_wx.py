@@ -3,12 +3,13 @@
 """
 ## import logging
 ## logging.basicConfig(filename='axe_wx.log', level=logging.DEBUG,
-    ## format='%(asctime)s %(message)s')
+## format='%(asctime)s %(message)s')
 import os
 import sys
 import wx
 from .axe_base import getshortname, XMLTree, AxeMixin
 from .axe_base import ELSTART, TITEL, axe_iconame
+
 if os.name == "nt":
     HMASK = "XML files (*.xml)|*.xml|All files (*.*)|*.*"
 elif os.name == "posix":
@@ -17,11 +18,15 @@ IMASK = "All files|*.*"
 
 
 class ElementDialog(wx.Dialog):
-    """Dialog for editing an element
-    """
-    def __init__(self, parent, title='',  # size=(400, 270), pos=wx.DefaultPosition,
-                 style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
-                 item=None):
+    """Dialog for editing an element"""
+
+    def __init__(
+        self,
+        parent,
+        title="",  # size=(400, 270), pos=wx.DefaultPosition,
+        style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
+        item=None,
+    ):
         # wx.Dialog.__init__(self, parent, -1, title=title, pos=pos, size=size, style=style)
         wx.Dialog.__init__(self, parent, -1, title=title, style=style)
         self._parent = parent
@@ -29,16 +34,18 @@ class ElementDialog(wx.Dialog):
         lbl_name = wx.StaticText(self.pnl, -1, "element name:  ")
         self.txt_tag = wx.TextCtrl(self.pnl, -1, size=(200, -1))
         self.txt_tag.Bind(wx.EVT_KEY_UP, self.on_keyup)
-        self.cb = wx.CheckBox(self.pnl, -1, label='Bevat data:')
+        self.cb = wx.CheckBox(self.pnl, -1, label="Bevat data:")
         ## lbl_data = wx.StaticText(self.pnl, -1, "text data:")
-        self.txt_data = wx.TextCtrl(self.pnl, -1, size=(300, 140), style=wx.TE_MULTILINE)
+        self.txt_data = wx.TextCtrl(
+            self.pnl, -1, size=(300, 140), style=wx.TE_MULTILINE
+        )
         self.txt_data.Bind(wx.EVT_KEY_UP, self.on_keyup)
         self.btn_ok = wx.Button(self.pnl, id=wx.ID_SAVE)
         self.btn_ok.Bind(wx.EVT_BUTTON, self.on_ok)
         self.btn_cancel = wx.Button(self.pnl, id=wx.ID_CANCEL)
         self.SetAffirmativeId(wx.ID_SAVE)
 
-        tag = txt = ''
+        tag = txt = ""
         if item:
             tag = item["tag"]
             if "text" in item:
@@ -66,7 +73,9 @@ class ElementDialog(wx.Dialog):
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         hsizer.Add(self.btn_ok, 0, wx.EXPAND | wx.ALL, 2)
         hsizer.Add(self.btn_cancel, 0, wx.EXPAND | wx.ALL, 2)
-        sizer.Add(hsizer, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL, 2)
+        sizer.Add(
+            hsizer, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL, 2
+        )
 
         self.pnl.SetSizer(sizer)
         self.pnl.SetAutoLayout(True)
@@ -86,15 +95,18 @@ class ElementDialog(wx.Dialog):
 
     def on_cancel(self, ev):
         "dismiss dialog"
-        self.end('cancel')
+        self.end("cancel")
 
     def on_ok(self, ev):
         """final checks, send changed data to parent"""
         self._parent.data = {}
         tag = self.txt_tag.GetValue()
-        if tag == '' or len(tag.split()) > 1:
-            wx.MessageBox('Element name cannot be empty or contain spaces',
-                          self._parent.title, wx.OK | wx.ICON_ERROR)
+        if tag == "" or len(tag.split()) > 1:
+            wx.MessageBox(
+                "Element name cannot be empty or contain spaces",
+                self._parent.title,
+                wx.OK | wx.ICON_ERROR,
+            )
             return
         self._parent.data["tag"] = tag
         self._parent.data["data"] = self.cb.IsChecked()
@@ -114,9 +126,14 @@ class ElementDialog(wx.Dialog):
 
 class AttributeDialog(wx.Dialog):
     """Dialog for editing an attribute"""
-    def __init__(self, parent, title='',  # size=(320, 160), pos=wx.DefaultPosition,
-                 style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
-                 item=None):
+
+    def __init__(
+        self,
+        parent,
+        title="",  # size=(320, 160), pos=wx.DefaultPosition,
+        style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
+        item=None,
+    ):
         # wx.Dialog.__init__(self, parent, -1, title=title, pos=pos, size=size, style=style)
         wx.Dialog.__init__(self, parent, -1, title=title, style=style)
         self._parent = parent
@@ -133,7 +150,7 @@ class AttributeDialog(wx.Dialog):
         ## self.btn_cancel.Bind(wx.EVT_BUTTON, self.on_cancel)
         self.SetAffirmativeId(wx.ID_SAVE)
 
-        nam = val = ''
+        nam = val = ""
         if item:
             nam, val = item["name"], item["value"]
         self.txt_name.SetValue(nam)
@@ -151,7 +168,9 @@ class AttributeDialog(wx.Dialog):
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         hsizer.Add(self.btn_ok, 0, wx.EXPAND | wx.ALL, 2)
         hsizer.Add(self.btn_cancel, 0, wx.EXPAND | wx.ALL, 2)
-        sizer.Add(hsizer, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL, 2)
+        sizer.Add(
+            hsizer, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL, 2
+        )
 
         self.pnl.SetSizer(sizer)
         self.pnl.SetAutoLayout(True)
@@ -172,9 +191,12 @@ class AttributeDialog(wx.Dialog):
         """final checks, transmit changes to parent"""
         self._parent.data = {}
         nam = self.txt_name.GetValue()
-        if nam == '':
-            wx.MessageBox('Attribute name cannot be empty or spaces', self._parent.title,
-                          wx.OK | wx.ICON_ERROR)
+        if nam == "":
+            wx.MessageBox(
+                "Attribute name cannot be empty or spaces",
+                self._parent.title,
+                wx.OK | wx.ICON_ERROR,
+            )
             return
         self._parent.data["name"] = nam
         self._parent.data["value"] = self.txt_value.GetValue()
@@ -183,7 +205,7 @@ class AttributeDialog(wx.Dialog):
 
     def on_cancel(self, ev):
         "dismiss dialog"
-        self.end('cancel')
+        self.end("cancel")
 
     def on_keyup(self, ev):
         """event handler to make "select all" possible"""
@@ -197,7 +219,8 @@ class AttributeDialog(wx.Dialog):
 
 class MainFrame(wx.Frame, AxeMixin):
     "Main application window"
-    def __init__(self, parent, id, fn=''):
+
+    def __init__(self, parent, id, fn=""):
         self.parent = parent
         self.id = id
         self.fn = fn
@@ -237,16 +260,16 @@ class MainFrame(wx.Frame, AxeMixin):
         "event handler for keyboard"
         ky = ev.GetKeyCode()
         if ev.GetModifiers() == wx.MOD_CONTROL:
-            if ky == ord('N'):
+            if ky == ord("N"):
                 self.newxml()
-            elif ky == ord('O'):
+            elif ky == ord("O"):
                 self.openxml()
-            elif ky == ord('S'):
+            elif ky == ord("S"):
                 self.savexml()
-            elif ky == ord('Q'):
+            elif ky == ord("Q"):
                 self.quit()
         elif ev.GetModifiers() == wx.MOD_CONTROL | wx.MOD_SHIFT:
-            if ky == ord('S'):
+            if ky == ord("S"):
                 self.savexmlas()
         item = self.tree.Selection
         if item and item != self.top:
@@ -306,8 +329,9 @@ class MainFrame(wx.Frame, AxeMixin):
             ## self.SetTitle(" - ".join((os.path.basename(self.xmlfn), TITEL)))
             self.mark_dirty(False)
 
-    def savexmlfile(self, oldfile=''):      # writexml
+    def savexmlfile(self, oldfile=""):  # writexml
         "(re)write tree to XML file"
+
         def expandnode(rt, root, tree):
             "recursively expand node"
             tag, c = self.tree.GetFirstChild(rt)
@@ -318,6 +342,7 @@ class MainFrame(wx.Frame, AxeMixin):
                 if node is not None:
                     expandnode(tag, node, tree)
                 tag, c = self.tree.GetNextChild(rt, c)
+
         AxeMixin.savexmlfile(self, oldfile)
         top = self.tree.GetRootItem()
         rt = self.tree.GetLastChild(top)
@@ -333,8 +358,9 @@ class MainFrame(wx.Frame, AxeMixin):
         "reimplemented from mixin to swallow menu event"
         AxeMixin.about(self)
 
-    def init_tree(self, root, prefixes=None, uris=None, name=''):
+    def init_tree(self, root, prefixes=None, uris=None, name=""):
         "set up display tree"
+
         def add_to_tree(el, rt):
             "recursively add elements"
             h = (el.tag, el.text)
@@ -345,7 +371,9 @@ class MainFrame(wx.Frame, AxeMixin):
                 if not h:
                     h = '""'
                 h = (attr, h)
-                rrr = self.tree.AppendItem(rr, getshortname((h, prefixes, uris), attr=True))
+                rrr = self.tree.AppendItem(
+                    rr, getshortname((h, prefixes, uris), attr=True)
+                )
                 self.tree.SetItemData(rrr, h)
             for subel in list(el):
                 add_to_tree(subel, rr)
@@ -374,6 +402,7 @@ class MainFrame(wx.Frame, AxeMixin):
 
     def copy(self, ev=None, cut=False, retain=True):  # retain is t.b.v. delete functie
         """execute cut/delete/copy action"""
+
         def push_el(el, result):
             "copy element data recursively"
             # print "start: ",result
@@ -390,6 +419,7 @@ class MainFrame(wx.Frame, AxeMixin):
             result.append((text, data, children))
             # print "end:  ",result
             return result
+
         if not self._checkselection():
             return
         text = self.tree.GetItemText(self.item)
@@ -434,19 +464,25 @@ class MainFrame(wx.Frame, AxeMixin):
             return
         data = self.tree.GetItemData(self.item)
         if pastebelow and not self.tree.GetItemText(self.item).startswith(ELSTART):
-            wx.MessageBox("Can't paste below an attribute", self.title, wx.OK | wx.ICON_ERROR)
+            wx.MessageBox(
+                "Can't paste below an attribute", self.title, wx.OK | wx.ICON_ERROR
+            )
             return
         if data == self.rt:
             if before:
-                wx.MessageBox("Can't paste before the root",
-                              self.title, wx.OK | wx.ICON_ERROR)
+                wx.MessageBox(
+                    "Can't paste before the root", self.title, wx.OK | wx.ICON_ERROR
+                )
                 return
             else:
-                wx.MessageBox("Pasting as first element below root",
-                              self.title, wx.OK | wx.ICON_INFORMATION)
+                wx.MessageBox(
+                    "Pasting as first element below root",
+                    self.title,
+                    wx.OK | wx.ICON_INFORMATION,
+                )
                 pastebelow = True
         ## if self.cut:
-            ## self._enable_pasteitems(False)
+        ## self._enable_pasteitems(False)
         print("paste(): print self.cut_el, self.cut_att")
         print(self.cut_el, self.cut_att)
         if self.cut_att:
@@ -472,6 +508,7 @@ class MainFrame(wx.Frame, AxeMixin):
                     node = self.tree.AppendItem(add_to, item)
                     self.tree.SetItemPyData(node, data)
         else:
+
             def zetzeronder(node, el, pos=-1):
                 "add elements recursively"
                 if pos == -1:
@@ -482,6 +519,7 @@ class MainFrame(wx.Frame, AxeMixin):
                     self.tree.SetItemData(subnode, el[1])
                 for x in el[2]:
                     zetzeronder(subnode, x)
+
             if pastebelow:
                 node = self.item
                 i = -1
@@ -514,7 +552,7 @@ class MainFrame(wx.Frame, AxeMixin):
             return
         edt = ElementDialog(self, title="New element")
         if edt.ShowModal() == wx.ID_SAVE:
-            data = self.data['tag'], self.data['text']
+            data = self.data["tag"], self.data["text"]
             text = getshortname((data, [], []))
             if below:
                 rt = self.tree.AppendItem(self.item, text)
@@ -532,8 +570,7 @@ class MainFrame(wx.Frame, AxeMixin):
 
     # internals
     def _init_gui(self):
-        """Deze methode wordt aangeroepen door de __init__ van de mixin class
-        """
+        """Deze methode wordt aangeroepen door de __init__ van de mixin class"""
         wx.Frame.__init__(self, self.parent, self.id, pos=(2, 2), size=(620, 900))
         self.SetIcon(wx.Icon(axe_iconame, wx.BITMAP_TYPE_ICO))
         self.Bind(wx.EVT_CLOSE, self.afsl)
@@ -550,7 +587,8 @@ class MainFrame(wx.Frame, AxeMixin):
         ## self.helpmenu.append('About', callback = self.about)
 
         self.pnl = wx.Panel(self, -1)
-        self.tree = wx.TreeCtrl(self.pnl, -1)        self.tree.Bind(wx.EVT_LEFT_DCLICK, self.on_doubleclick)
+        self.tree = wx.TreeCtrl(self.pnl, -1)
+        self.tree.Bind(wx.EVT_LEFT_DCLICK, self.on_doubleclick)
         self.tree.Bind(wx.EVT_RIGHT_DOWN, self.on_rightdown)
         self.tree.Bind(wx.EVT_KEY_UP, self.on_keyup)
         sizer0 = wx.BoxSizer(wx.VERTICAL)
@@ -582,17 +620,17 @@ class MainFrame(wx.Frame, AxeMixin):
             self.Bind(wx.EVT_MENU, self.openxml, mitem)
             filemenu.Append(mitem)
             # accels.append(wx.AcceleratorEntry(wx.ACCEL_CTRL, ord('O'), 0, mitem))
-            mitem = wx.MenuItem(filemenu, -1, '&Save')
+            mitem = wx.MenuItem(filemenu, -1, "&Save")
             self.Bind(wx.EVT_MENU, self.savexml, mitem)
             filemenu.Append(mitem)
             # accels.append(wx.AcceleratorEntry(wx.ACCEL_CTRL, ord('S'), 0, mitem))
-            mitem = wx.MenuItem(filemenu, -1, 'Save &As')
+            mitem = wx.MenuItem(filemenu, -1, "Save &As")
             self.Bind(wx.EVT_MENU, self.savexmlas, mitem)
             filemenu.Append(mitem)
             # accels.append(wx.AcceleratorEntry(wx.ACCEL_CTRL | wx.ACCEL_SHIFT, ord('S'),
             #                                   0, mitem))
             filemenu.AppendSeparator()
-            mitem = wx.MenuItem(filemenu, -1, 'E&xit')
+            mitem = wx.MenuItem(filemenu, -1, "E&xit")
             self.Bind(wx.EVT_MENU, self.quit, mitem)
             filemenu.Append(mitem)
             # accels.append(wx.AcceleratorEntry(wx.ACCEL_CTRL, ord('Q'), 0, mitem))
@@ -629,9 +667,9 @@ class MainFrame(wx.Frame, AxeMixin):
         disable_menu = True if not self.cut_el and not self.cut_att else False
         ## add_menuitem = True if not popup or not disable_menu else False
         ## if add_menuitem:
-            ## editmenu.Append(mitem)
+        ## editmenu.Append(mitem)
         ## else:
-            ## viewmenu.Append(mitem)
+        ## viewmenu.Append(mitem)
         editmenu.Append(mitem)
         if disable_menu:
             mitem.SetItemLabel("Nothing to Paste")
@@ -641,9 +679,9 @@ class MainFrame(wx.Frame, AxeMixin):
         mitem = wx.MenuItem(editmenu, -1, "Paste After")
         self.Bind(wx.EVT_MENU, self.paste_after, mitem)
         ## if add_menuitem:
-            ## editmenu.Append(mitem)
+        ## editmenu.Append(mitem)
         ## else:
-            ## viewmenu.Append(mitem)
+        ## viewmenu.Append(mitem)
         editmenu.Append(mitem)
         if disable_menu:
             ## mitem.SetItemLabel(" ")
@@ -653,9 +691,9 @@ class MainFrame(wx.Frame, AxeMixin):
         mitem = wx.MenuItem(editmenu, -1, "Paste Under")
         self.Bind(wx.EVT_MENU, self.paste_under, mitem)
         ## if add_menuitem:
-            ## editmenu.Append(mitem)
+        ## editmenu.Append(mitem)
         ## else:
-            ## viewmenu.Append(mitem)
+        ## viewmenu.Append(mitem)
         editmenu.Append(mitem)
         if disable_menu:
             ## mitem.SetItemLabel(" ")
@@ -666,13 +704,13 @@ class MainFrame(wx.Frame, AxeMixin):
         mitem = wx.MenuItem(editmenu, -1, "Insert Attribute")
         self.Bind(wx.EVT_MENU, self.add_attr, mitem)
         editmenu.Append(mitem)
-        mitem = wx.MenuItem(editmenu, -1, 'Insert Element Before')
+        mitem = wx.MenuItem(editmenu, -1, "Insert Element Before")
         self.Bind(wx.EVT_MENU, self.insert, mitem)
         editmenu.Append(mitem)
-        mitem = wx.MenuItem(editmenu, -1, 'Insert Element After')
+        mitem = wx.MenuItem(editmenu, -1, "Insert Element After")
         self.Bind(wx.EVT_MENU, self.insert_after, mitem)
         editmenu.Append(mitem)
-        mitem = wx.MenuItem(editmenu, -1, 'Insert Element Under')
+        mitem = wx.MenuItem(editmenu, -1, "Insert Element Under")
         self.Bind(wx.EVT_MENU, self.insert_child, mitem)
         editmenu.Append(mitem)
         # accel = wx.AcceleratorTable(accels)
@@ -705,22 +743,33 @@ class MainFrame(wx.Frame, AxeMixin):
 
     def _file_to_read(self):
         """ask for file to load"""
-        dlg = wx.FileDialog(self, message="Choose a file",
-                            defaultDir=os.getcwd(), wildcard=HMASK, style=wx.FD_OPEN)
+        dlg = wx.FileDialog(
+            self,
+            message="Choose a file",
+            defaultDir=os.getcwd(),
+            wildcard=HMASK,
+            style=wx.FD_OPEN,
+        )
         ret = dlg.ShowModal()
-        ok = (ret == wx.ID_OK)
-        fnaam = dlg.GetPath() if ok else ''
+        ok = ret == wx.ID_OK
+        fnaam = dlg.GetPath() if ok else ""
         dlg.Destroy()
         return ok, fnaam
 
     def _file_to_save(self):  # afwijkende signature
         """ask for file to save"""
         d, f = os.path.split(self.xmlfn)
-        dlg = wx.FileDialog(self, message="Save file as ...",
-                            defaultDir=d, defaultFile=f, wildcard=HMASK, style=wx.FD_SAVE)
+        dlg = wx.FileDialog(
+            self,
+            message="Save file as ...",
+            defaultDir=d,
+            defaultFile=f,
+            wildcard=HMASK,
+            style=wx.FD_SAVE,
+        )
         ret = dlg.ShowModal()
-        ok = (ret == wx.ID_OK)
-        name = dlg.GetPath() if ok else ''
+        ok = ret == wx.ID_OK
+        name = dlg.GetPath() if ok else ""
         dlg.Destroy()
         return ok, name
 
@@ -745,8 +794,11 @@ class MainFrame(wx.Frame, AxeMixin):
         sel = True
         self.item = self.tree.Selection
         if self.item is None or self.item == self.top:
-            wx.MessageBox('You need to select an element or attribute first',
-                          self.title, wx.OK | wx.ICON_INFORMATION)
+            wx.MessageBox(
+                "You need to select an element or attribute first",
+                self.title,
+                wx.OK | wx.ICON_INFORMATION,
+            )
             sel = False
         return sel
 
@@ -774,11 +826,11 @@ class MainFrame(wx.Frame, AxeMixin):
         data = self.tree.GetItemText(self.item)  # self.item.get_text()
         if data.startswith(ELSTART):
             tag, text = self.tree.GetItemData(self.item)  # self.item.get_data()
-            data = {'item': self.item, 'tag': tag}
+            data = {"item": self.item, "tag": tag}
             if text is not None:
-                data['data'] = True
-                data['text'] = text
-            edt = ElementDialog(self, title='Edit an element', item=data)
+                data["data"] = True
+                data["text"] = text
+            edt = ElementDialog(self, title="Edit an element", item=data)
             if edt.ShowModal() == wx.ID_SAVE:
                 h = (self.data["tag"], self.data["text"])
                 self.tree.SetItemText(self.item, getshortname(h))
@@ -786,8 +838,8 @@ class MainFrame(wx.Frame, AxeMixin):
                 self.mark_dirty(True)
         else:
             nam, val = self.tree.GetItemData(self.item)  # self.item.get_data()
-            data = {'item': self.item, 'name': nam, 'value': val}
-            edt = AttributeDialog(self, title='Edit an attribute', item=data)
+            data = {"item": self.item, "name": nam, "value": val}
+            edt = AttributeDialog(self, title="Edit an attribute", item=data)
             if edt.ShowModal() == wx.ID_SAVE:
                 h = (self.data["name"], self.data["value"])
                 self.tree.SetItemText(self.item, getshortname(h, attr=True))
@@ -805,7 +857,9 @@ class MainFrame(wx.Frame, AxeMixin):
             data = self.tree.GetItemText(self.item)
             if data.startswith(ELSTART):
                 h = (self.data["name"], self.data["value"])
-                rt = self.tree.AppendItem(self.item, getshortname((h, [], []), attr=True))
+                rt = self.tree.AppendItem(
+                    self.item, getshortname((h, [], []), attr=True)
+                )
                 self.tree.SetItemData(rt, h)
                 self.mark_dirty(True)
             else:
@@ -813,12 +867,14 @@ class MainFrame(wx.Frame, AxeMixin):
         edt.Destroy()
 
     ## def on_click(self, event):      # not used?
-        ## self.close()
+    ## self.close()
 
 
 def axe_gui(args):
     "start up the editor"
-    app = wx.App(redirect=False)  # True, filename="/home/albert/xmledit/axe/axe_wx.log")
+    app = wx.App(
+        redirect=False
+    )  # True, filename="/home/albert/xmledit/axe/axe_wx.log")
     print("----")
     if len(args) > 1:
         frm = MainFrame(None, -1, fn=" ".join(args[1:]))

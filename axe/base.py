@@ -3,16 +3,19 @@ XMLEdit GUI-onafhankelijke code
 """
 
 import os
+
 # import pathlib
 ## import sys
 import shutil
 import xml.etree.ElementTree as et
+
 # import logging
 
 from .shared import ELSTART, log
 from .gui import Gui
+
 TITEL = "Albert's (Simple) XML editor"
-NEW_ROOT = '(new root)'
+NEW_ROOT = "(new root)"
 
 
 def find_in_flattened_tree(data, search_args, reverse=False, pos=None):
@@ -42,9 +45,9 @@ def find_in_flattened_tree(data, search_args, reverse=False, pos=None):
         if is_attr:
             data = data[ix:]
             id, name, text, attrs = data[0]
-            data[0] = id, name, text, attrs[ix2 + 1:]
+            data[0] = id, name, text, attrs[ix2 + 1 :]
         elif ix < len(data) - 1:
-            data = data[ix + 1:]
+            data = data[ix + 1 :]
         else:
             return None, False  # no more data to search
 
@@ -93,8 +96,7 @@ def find_in_flattened_tree(data, search_args, reverse=False, pos=None):
 
 
 def parse_nsmap(file):
-    """analyze namespaces
-    """
+    """analyze namespaces"""
     root = None
     ns_prefixes = []
     ns_uris = []
@@ -110,9 +112,9 @@ def parse_nsmap(file):
     return et.ElementTree(root), ns_prefixes, ns_uris
 
 
-class XMLTree():
-    """class to store XMLdata
-    """
+class XMLTree:
+    """class to store XMLdata"""
+
     def __init__(self, data):
         self.root = et.Element(data)
 
@@ -138,11 +140,12 @@ class XMLTree():
 
 
 ## class AxeMixin():
-class Editor():
+class Editor:
     "Applicatievenster zonder GUI-specifieke methoden"
+
     def __init__(self, fname):
         self.title = "Albert's XML Editor"
-        self.xmlfn = os.path.abspath(fname) if fname else ''
+        self.xmlfn = os.path.abspath(fname) if fname else ""
         self.gui = Gui(self, fname)
         self.gui.cut_att = None
         self.gui.cut_el = None
@@ -165,8 +168,8 @@ class Editor():
         en retourneert de overeenkomstig gewijzigde tekst voor de titel
         """
         self.tree_dirty = state
-        test = ' - ' + TITEL
-        test2 = '*' + test
+        test = " - " + TITEL
+        test2 = "*" + test
         title = self.gui.get_windowtitle()
         has_test2 = test2 in title
         if state and not has_test2:
@@ -177,12 +180,12 @@ class Editor():
             self.gui.set_windowtitle(title)
 
     def check_tree(self):
-        """vraag of er iets moet gebeuren wanneer de data gewijzigd is
-        """
+        """vraag of er iets moet gebeuren wanneer de data gewijzigd is"""
         ok = True
         if self.tree_dirty:
-            h = self.gui.ask_yesnocancel("XML data has been modified - "
-                                         "save before continuing?")
+            h = self.gui.ask_yesnocancel(
+                "XML data has been modified - " "save before continuing?"
+            )
             if h == 1:
                 self.savexml()
             elif h == -1:
@@ -198,12 +201,13 @@ class Editor():
         sel = True
         self.item = self.gui.get_selected_item()  # self.tree.Selection
         if message and (self.item is None or self.item == self.top):
-            self.gui.meldinfo('You need to select an element or attribute first')
+            self.gui.meldinfo("You need to select an element or attribute first")
             sel = False
         return sel
 
-    def writexml(self, oldfile=''):
+    def writexml(self, oldfile=""):
         "(re)write tree to XML file; backup first"
+
         def expandnode(rt, root, tree):
             "recursively expand node"
             for tag in self.gui.get_node_children(rt):
@@ -212,8 +216,9 @@ class Editor():
                 node = tree.expand(root, title, data)
                 if node is not None:
                     expandnode(tag, node, tree)
-        if oldfile == '':
-            oldfile = self.xmlfn + '.bak'
+
+        if oldfile == "":
+            oldfile = self.xmlfn + ".bak"
         if os.path.exists(self.xmlfn):
             shutil.copyfile(self.xmlfn, oldfile)
         rt = self.gui.get_treetop()
@@ -228,8 +233,9 @@ class Editor():
         tree.write(self.xmlfn, namespace_data)
         self.mark_dirty(False)
 
-    def init_tree(self, root, prefixes=None, uris=None, name=''):
+    def init_tree(self, root, prefixes=None, uris=None, name=""):
         "set up display tree"
+
         def add_to_tree(el, rt):
             "recursively add elements"
             rr = self.add_item(rt, el.tag, el.text)
@@ -241,12 +247,13 @@ class Editor():
                 self.add_item(rr, attr, h, attr=True)
             for subel in list(el):
                 add_to_tree(subel, rr)
+
         if name:
             titel = name
         elif self.xmlfn:
             titel = self.xmlfn
         else:
-            titel = '[unsaved file]'
+            titel = "[unsaved file]"
         self.top = self.gui.setup_new_tree(titel)
         self.rt = root
         self.ns_prefixes = prefixes or []
@@ -259,11 +266,11 @@ class Editor():
         for ix, prf in enumerate(self.ns_prefixes):
             if not namespaces:
                 ns_root = self.gui.add_node_to_parent(self.top)
-                self.gui.set_node_title(ns_root, 'namespaces')
+                self.gui.set_node_title(ns_root, "namespaces")
                 # ns_root = qtw.QTreeWidgetItem(['namespaces'])
                 namespaces = True
             ns_item = self.gui.add_node_to_parent(ns_root)
-            self.gui.set_node_title(ns_item, '{}: {}'.format(prf, self.ns_uris[ix]))
+            self.gui.set_node_title(ns_item, "{}: {}".format(prf, self.ns_uris[ix]))
         rt = self.add_item(self.top, self.rt.tag, self.rt.text)
         for attr in self.rt.keys():
             h = self.rt.get(attr)
@@ -279,25 +286,24 @@ class Editor():
         self.mark_dirty(False)
 
     def getshortname(self, data, attr=False):
-        """build and return a name for this node
-        """
+        """build and return a name for this node"""
         fullname, value = data
-        text = ''
+        text = ""
         if attr:
-            text = value.rstrip('\n')
+            text = value.rstrip("\n")
         elif value:
             text = value.split("\n", 1)[0]
         max = 60
         if len(text) > max:
-            text = text[:max].lstrip() + '...'
-        if fullname.startswith('{'):
-            uri, localname = fullname[1:].split('}')
+            text = text[:max].lstrip() + "..."
+        if fullname.startswith("{"):
+            uri, localname = fullname[1:].split("}")
             for i, ns_uri in enumerate(self.ns_uris):
                 if ns_uri == uri:
                     prefix = self.ns_prefixes[i]
                     break
-            fullname = ':'.join((prefix, localname))
-        strt = ' '.join((ELSTART, fullname))
+            fullname = ":".join((prefix, localname))
+        strt = " ".join((ELSTART, fullname))
         if attr:
             return " = ".join((fullname, text))
         elif text:
@@ -306,8 +312,11 @@ class Editor():
 
     def add_item(self, to_item, name, value, before=False, below=True, attr=False):
         """execute adding of item"""
-        log('in add_item for {} value {} to {} before is {} below is {}'.format(
-            name, value, to_item, before, below))
+        log(
+            "in add_item for {} value {} to {} before is {} below is {}".format(
+                name, value, to_item, before, below
+            )
+        )
         if value is None:
             value = ""
         itemtext = self.getshortname((name, value), attr)
@@ -323,43 +332,52 @@ class Editor():
                     insert = seq
         else:
             add_under, insert = self.gui.get_node_parentpos(to_item)
-            print('in base.add_item (not below), insert is', insert)
+            print("in base.add_item (not below), insert is", insert)
             if not before:
                 insert += 1
-            print('in base.add_item after correction, insert is', insert)
+            print("in base.add_item after correction, insert is", insert)
         item = self.gui.add_node_to_parent(add_under, insert)
         self.gui.set_node_title(item, itemtext)
         self.gui.set_node_data(item, name, value)
         return item
 
     def get_menu_data(self):
-        """return menu structure for GUI (title, callback, keyboard shortcut(s))
-        """
-        return ((("&New", self.newxml, 'Ctrl+N'),
-                 ("&Open", self.openxml, 'Ctrl+O'),
-                 ('&Save', self.savexml, 'Ctrl+S'),
-                 ('Save &As', self.savexmlas, 'Shift+Ctrl+S'),
-                 ('E&xit', self.gui.quit, 'Ctrl+Q'), ),
-                (("&Expand All (sub)Levels", self.expand, 'Ctrl++'),
-                 ("&Collapse All (sub)Levels", self.collapse, 'Ctrl+-'), ),
-                (("Nothing to &Undo", self.undo, 'Ctrl+Z'),
-                 ("Nothing to &Redo", self.redo, 'Ctrl+Y'),
-                 ("&Edit", self.edit, 'Ctrl+E,F2'),
-                 ("&Delete", self.delete, 'Ctrl+D,Delete'),
-                 ("C&ut", self.cut, 'Ctrl+X'),
-                 ("&Copy", self.copy, 'Ctrl+C'),
-                 ("Paste Before", self.paste, 'Shift+Ctrl+V'),
-                 ("Paste After", self.paste_after, 'Ctrl+V'),
-                 ("Paste Under", self.paste_under, 'Alt+Ctrl+V'),
-                 ("Insert Attribute", self.add_attr, 'Shift+Insert'),
-                 ('Insert Element Before', self.insert, 'Ctrl+Insert'),
-                 ('Insert Element After', self.insert_after, 'Alt+Insert'),
-                 ('Insert Element Under', self.insert_child, 'Insert'), ),
-                (("&Find", self.search, 'Ctrl+F'),
-                 ("Find &Last", self.search_last, 'Shift+Ctrl+F'),
-                 ("Find &Next", self.search_next, 'F3'),
-                 ("Find &Previous", self.search_prev, 'Shift+F3'),
-                 ("&Replace", self.replace, 'Ctrl+H'), ))
+        """return menu structure for GUI (title, callback, keyboard shortcut(s))"""
+        return (
+            (
+                ("&New", self.newxml, "Ctrl+N"),
+                ("&Open", self.openxml, "Ctrl+O"),
+                ("&Save", self.savexml, "Ctrl+S"),
+                ("Save &As", self.savexmlas, "Shift+Ctrl+S"),
+                ("E&xit", self.gui.quit, "Ctrl+Q"),
+            ),
+            (
+                ("&Expand All (sub)Levels", self.expand, "Ctrl++"),
+                ("&Collapse All (sub)Levels", self.collapse, "Ctrl+-"),
+            ),
+            (
+                ("Nothing to &Undo", self.undo, "Ctrl+Z"),
+                ("Nothing to &Redo", self.redo, "Ctrl+Y"),
+                ("&Edit", self.edit, "Ctrl+E,F2"),
+                ("&Delete", self.delete, "Ctrl+D,Delete"),
+                ("C&ut", self.cut, "Ctrl+X"),
+                ("&Copy", self.copy, "Ctrl+C"),
+                ("Paste Before", self.paste, "Shift+Ctrl+V"),
+                ("Paste After", self.paste_after, "Ctrl+V"),
+                ("Paste Under", self.paste_under, "Alt+Ctrl+V"),
+                ("Insert Attribute", self.add_attr, "Shift+Insert"),
+                ("Insert Element Before", self.insert, "Ctrl+Insert"),
+                ("Insert Element After", self.insert_after, "Alt+Insert"),
+                ("Insert Element Under", self.insert_child, "Insert"),
+            ),
+            (
+                ("&Find", self.search, "Ctrl+F"),
+                ("Find &Last", self.search_last, "Shift+Ctrl+F"),
+                ("Find &Next", self.search_next, "F3"),
+                ("Find &Previous", self.search_prev, "Shift+F3"),
+                ("&Replace", self.replace, "Ctrl+H"),
+            ),
+        )
 
     def flatten_tree(self, element):
         """return the tree's structure as a flat list
@@ -371,9 +389,9 @@ class Editor():
         try:
             title, data = self.gui.get_node_data(element)
         except TypeError:
-            title = data = ''
+            title = data = ""
         if not data:
-            data = ('', '')
+            data = ("", "")
         elem_list = [(element, title, data, attr_list)]
 
         subel_list = []
@@ -399,18 +417,22 @@ class Editor():
                 self._search_pos = self.item, None
             else:
                 loc = -1 if reverse else 0
-                self._search_pos = self.gui.get_node_children(self.gui.get_treetop())[loc], None
+                self._search_pos = (
+                    self.gui.get_node_children(self.gui.get_treetop())[loc],
+                    None,
+                )
             self.find_next(reverse)
 
     def find_next(self, reverse=False):
         "find (default is forward)"
-        found, is_attr = find_in_flattened_tree(self.flatten_tree(self.top), self.search_args,
-                                                reverse, self._search_pos)
+        found, is_attr = find_in_flattened_tree(
+            self.flatten_tree(self.top), self.search_args, reverse, self._search_pos
+        )
         if found:
             self.gui.set_selected_item(found)
             self._search_pos = (found, is_attr)
         else:
-            self.gui.meldinfo('Niks (meer) gevonden')
+            self.gui.meldinfo("Niks (meer) gevonden")
 
     # user actions from application menu
     def newxml(self, event=None):
@@ -419,7 +441,9 @@ class Editor():
         de underscore methode moet in de gui module zijn gedefinieerd
         """
         if self.check_tree():
-            h = self.gui.ask_for_text("Enter a name (tag) for the root element", NEW_ROOT)
+            h = self.gui.ask_for_text(
+                "Enter a name (tag) for the root element", NEW_ROOT
+            )
             if not h:
                 h = NEW_ROOT
             self.xmlfn = ""
@@ -440,7 +464,7 @@ class Editor():
 
     def savexml(self, event=None):
         "(re)save XML; ask for filename if unknown"
-        if self.xmlfn == '':
+        if self.xmlfn == "":
             self.savexmlas()
         else:
             self.writexml()
@@ -456,13 +480,11 @@ class Editor():
         return ok
 
     def expand(self, event=None):
-        """show all children of the current node
-        """
+        """show all children of the current node"""
         self.gui.expand_item()
 
     def collapse(self, event=None):
-        """hide all children of the current node
-        """
+        """hide all children of the current node"""
         self.gui.collapse_item()
 
     def undo(self, event=None):
@@ -474,8 +496,7 @@ class Editor():
         self.gui.do_redo()
 
     def edit(self, event=None):
-        """start dialog to edit the current element
-        """
+        """start dialog to edit the current element"""
         if not self.checkselection():
             return
         self.gui.edit_item(self.item)
@@ -490,7 +511,7 @@ class Editor():
 
     def get_copy_text(self, cut, retain):
         "geef keyword voor copy actie terug"
-        return 'copy' if not cut else 'delete' if not retain else 'cut'
+        return "copy" if not cut else "delete" if not retain else "cut"
 
     def copy(self, event=None, cut=False, retain=True):
         "standard copy"
@@ -504,17 +525,17 @@ class Editor():
 
     def paste_after(self, event=None):
         "paste after instead of before"
-        print('in paste_after')
+        print("in paste_after")
         self.paste(before=False)
 
     def paste_under(self, event=None):
         "paste under instead of after"
-        print('in paste_under')
+        print("in paste_under")
         self.paste(below=True)
 
     def paste(self, event=None, before=True, below=False):
         "paste after"
-        print('in paste_before')
+        print("in paste_before")
         if not self.checkselection():
             return
         if self.gui.get_node_parentpos(self.item)[0] == self.gui.top and not below:
@@ -530,8 +551,7 @@ class Editor():
         self.gui.paste(self.item, before=before, below=below)
 
     def add_attr(self, event=None):
-        """start dialog to add a new attribute to the element
-        """
+        """start dialog to add a new attribute to the element"""
         if not self.checkselection():
             return
         if not self.gui.get_node_title(self.item).startswith(ELSTART):
@@ -579,15 +599,15 @@ class Editor():
     def get_search_text(ele, attr_name, attr_val, text):
         "build text describing search arguments"
         attr = attr_name or attr_val
-        out = ['search for'] if any((ele, attr, text)) else ['']
-        has_text = ' that has'
-        name_text = ' a name'
-        value_text = ' a value'
-        contain_text = '   containing `{}`'
+        out = ["search for"] if any((ele, attr, text)) else [""]
+        has_text = " that has"
+        name_text = " a name"
+        value_text = " a value"
+        contain_text = "   containing `{}`"
         if ele:
-            ele_out = [' an element' + has_text + name_text, contain_text.format(ele)]
+            ele_out = [" an element" + has_text + name_text, contain_text.format(ele)]
         if attr:
-            attr_out = [' an attribute' + has_text]
+            attr_out = [" an attribute" + has_text]
             if attr_name:
                 attr_out[0] += name_text
                 attr_out.append(contain_text.format(attr_name))
@@ -595,18 +615,18 @@ class Editor():
                 if not attr_name:
                     attr_out[0] += value_text
                 else:
-                    attr_out.append(' and' + value_text)
+                    attr_out.append(" and" + value_text)
                 attr_out.append(contain_text.format(attr_val))
             if ele:
-                attr_out[0] = ' with' + attr_out[0]
+                attr_out[0] = " with" + attr_out[0]
         if text:
-            out[0] += ' text'
-            out.append('   `{}`'.format(text))
+            out[0] += " text"
+            out.append("   `{}`".format(text))
             if ele:
-                ele_out[0] = ' under' + ele_out[0]
+                ele_out[0] = " under" + ele_out[0]
                 out += ele_out
             elif attr:
-                out += [' under an element with']
+                out += [" under an element with"]
             if attr:
                 out += attr_out
         elif ele:
@@ -620,7 +640,7 @@ class Editor():
 
     def replace(self, event=None):
         "replace an element?"
-        self.gui.meldinfo('Replace: not sure if I wanna implement this')
+        self.gui.meldinfo("Replace: not sure if I wanna implement this")
 
     def about(self, event=None):
         "Credits"

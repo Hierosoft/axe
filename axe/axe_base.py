@@ -5,26 +5,29 @@ XMLEdit GUI-onafhankelijke code
 
 import os
 import pathlib
+
 ## import sys
 import shutil
+
 ## import copy
 import xml.etree.ElementTree as et
 import logging
 
-ELSTART = '<>'
+ELSTART = "<>"
 TITEL = "Albert's (Simple) XML editor"
 APATH = pathlib.Path(__file__).parent
 axe_iconame = str(APATH / "axe.ico")
 # always log in program directory
-LOGFILE = APATH.parent / 'logs' / 'axe_qt.log'
-LOGPLEASE = 'DEBUG' in os.environ and os.environ["DEBUG"] != "0"
+LOGFILE = APATH.parent / "logs" / "axe_qt.log"
+LOGPLEASE = "DEBUG" in os.environ and os.environ["DEBUG"] != "0"
 if LOGPLEASE:
     if not LOGFILE.parent.exists():
         LOGFILE.parent.mkdir()
     if not LOGFILE.exists():
         LOGFILE.touch()
-    logging.basicConfig(filename=str(LOGFILE),
-                        level=logging.DEBUG, format='%(asctime)s %(message)s')
+    logging.basicConfig(
+        filename=str(LOGFILE), level=logging.DEBUG, format="%(asctime)s %(message)s"
+    )
 
 
 def log(message):
@@ -34,10 +37,9 @@ def log(message):
 
 
 def getshortname(x, attr=False):
-    """build and return a name for this node
-    """
+    """build and return a name for this node"""
     x, ns_prefixes, ns_uris = x
-    t = ''
+    t = ""
     if attr:
         t = x[1]
         if t[-1] == "\n":
@@ -46,16 +48,16 @@ def getshortname(x, attr=False):
         t = x[1].split("\n", 1)[0]
     w = 60
     if len(t) > w:
-        t = t[:w].lstrip() + '...'
+        t = t[:w].lstrip() + "..."
     fullname = x[0]
-    if fullname.startswith('{'):
-        uri, localname = fullname[1:].split('}')
+    if fullname.startswith("{"):
+        uri, localname = fullname[1:].split("}")
         for i, x in enumerate(ns_uris):
             if x == uri:
                 prefix = ns_prefixes[i]
                 break
-        fullname = ':'.join((prefix, localname))
-    strt = ' '.join((ELSTART, fullname))
+        fullname = ":".join((prefix, localname))
+    strt = " ".join((ELSTART, fullname))
     if attr:
         return " = ".join((fullname, t))
     elif t:
@@ -90,9 +92,9 @@ def find_next(data, search_args, reverse=False, pos=None):
         if is_attr:
             data = data[ix:]
             id, name, text, attrs = data[0]
-            data[0] = id, name, text, attrs[ix2 + 1:]
+            data[0] = id, name, text, attrs[ix2 + 1 :]
         elif ix < len(data) - 1:
-            data = data[ix + 1:]
+            data = data[ix + 1 :]
         else:
             return None, False  # no more data to search
 
@@ -135,8 +137,7 @@ def find_next(data, search_args, reverse=False, pos=None):
 
 
 def parse_nsmap(file):
-    """analyze namespaces
-    """
+    """analyze namespaces"""
     root = None
     ns_prefixes = []
     ns_uris = []
@@ -153,14 +154,14 @@ def parse_nsmap(file):
 
 
 class MixinError(BaseException):
-    """Custom exception for AxeMixin
-    """
+    """Custom exception for AxeMixin"""
+
     pass
 
 
-class XMLTree():
-    """class to store XMLdata
-    """
+class XMLTree:
+    """class to store XMLdata"""
+
     def __init__(self, data):
         self.root = et.Element(data)
 
@@ -185,19 +186,20 @@ class XMLTree():
         tree.write(fn, encoding="utf-8", xml_declaration=True)
 
 
-class AxeMixin():
+class AxeMixin:
     "Mixin met non-GUI methoden"
+
     def __init__(self):
         self.title = "Albert's XML Editor"
         if self.fn:
             self.xmlfn = os.path.abspath(self.fn)
         else:
-            self.xmlfn = ''
+            self.xmlfn = ""
         self.cut_att = None
         self.cut_el = None
         self._init_gui()
-        self.init_tree(et.Element('New'))
-        if self.xmlfn != '':
+        self.init_tree(et.Element("New"))
+        if self.xmlfn != "":
             try:
                 tree, prefixes, uris = parse_nsmap(self.xmlfn)
             except (IOError, et.ParseError) as err:
@@ -212,8 +214,8 @@ class AxeMixin():
         en retourneert de overeenkomstig gewijzigde tekst voor de titel
         """
         self.tree_dirty = state
-        test = ' - ' + TITEL
-        test2 = '*' + test
+        test = " - " + TITEL
+        test2 = "*" + test
         if state:
             if test2 not in data:
                 return data.replace(test, test2)
@@ -227,8 +229,9 @@ class AxeMixin():
         """
         ok = True
         if self.tree_dirty:
-            h = self._ask_yesnocancel("XML data has been modified - "
-                                      "save before continuing?")
+            h = self._ask_yesnocancel(
+                "XML data has been modified - " "save before continuing?"
+            )
             if h == 1:
                 self.savexml()
             elif h == -1:
@@ -262,7 +265,7 @@ class AxeMixin():
 
     def savexml(self):
         "(re)save XML; ask for filename if unknown"
-        if self.xmlfn == '':
+        if self.xmlfn == "":
             self.savexmlas()
         else:
             self.savexmlfile()
@@ -275,10 +278,10 @@ class AxeMixin():
             self.savexmlfile()  # oldfile=os.path.join(d,f))
         return ok
 
-    def savexmlfile(self, oldfile=''):
+    def savexmlfile(self, oldfile=""):
         "do the actual saving; backup first"
-        if oldfile == '':
-            oldfile = self.xmlfn + '.bak'
+        if oldfile == "":
+            oldfile = self.xmlfn + ".bak"
         if os.path.exists(self.xmlfn):
             shutil.copyfile(self.xmlfn, oldfile)
         self.writexml()
@@ -286,13 +289,13 @@ class AxeMixin():
     def writexml(self):
         "write XML back to file"
         ## namespace_data = None   # not used
-        XMLTree('root').write(self.xmlfn)
+        XMLTree("root").write(self.xmlfn)
 
     def about(self):
         "Credits"
         self.meldinfo("Started in 2008 by Albert Visser\nWritten in Python")
 
-    def init_tree(self, root, prefixes=None, uris=None, name=''):
+    def init_tree(self, root, prefixes=None, uris=None, name=""):
         "stelt een en ander in en geeft titel voor in de visuele tree terug"
         self.rt = root
         self.ns_prefixes = prefixes or []
@@ -302,7 +305,7 @@ class AxeMixin():
         elif self.xmlfn:
             titel = self.xmlfn
         else:
-            titel = '[unsaved file]'
+            titel = "[unsaved file]"
         return titel
 
     def cut(self):
@@ -317,11 +320,11 @@ class AxeMixin():
         "placeholder for standard copy"
         if cut:
             if retain:
-                txt = 'cut'
+                txt = "cut"
             else:
-                txt = 'delete'
+                txt = "delete"
         else:
-            txt = 'copy'
+            txt = "copy"
         return txt
 
     def paste_after(self):
