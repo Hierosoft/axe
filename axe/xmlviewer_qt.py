@@ -5,11 +5,20 @@ ietsje verder platgeslagen weergave
 import os
 import sys
 
-## import functools
-import PyQt5.QtWidgets as qtw
-import PyQt5.QtGui as gui
-import PyQt5.QtCore as core
-from .axe_base import getshortname, find_next, log, TITEL, axe_iconame, AxeMixin
+# import functools
+import PyQt5.QtWidgets as qtw  # noqa N813
+import PyQt5.QtGui as gui  # noqa N813
+import PyQt5.QtCore as core  # noqa N813
+from .axe_base import (
+    getshortname,
+    find_next,
+    log,
+    TITEL,
+    axe_iconame,
+    AxeMixin,
+)
+
+from axe.intl import _
 
 TITEL = TITEL.replace("editor", "viewer")
 if os.name == "nt":
@@ -22,8 +31,9 @@ IMASK = "All files (*.*)"
 def calculate_location(win, node):
     """attempt to calculate some kind of identification for a tree node
 
-    this function returns a tuple of subsequent indices of a child under its parent.
-    possibly this can be used in the replacements dictionary
+    Returns:
+        tuple: subsequent indices of a child under its parent, which
+            possibly can be used in the replacements dictionary.
     """
     id_ = []
     while node != win.top:
@@ -40,7 +50,11 @@ def flatten_tree(element):
     itemdict = element.data(0, core.Qt.UserRole)
     if itemdict:
         elem_list = [
-            (element, itemdict["tag"], itemdict["text"] or "", itemdict["attrs"])
+            (
+                element, itemdict["tag"],
+                itemdict["text"] or "",
+                itemdict["attrs"]
+            )
         ]
     else:
         elem_list = [(element, "", "", [])]
@@ -176,15 +190,17 @@ class SearchDialog(qtw.QDialog):
         attr_val = str(self.txt_attr_val.text())
         text = str(self.txt_text.text())
         if not any((ele, attr_name, attr_val, text)):
-            self._parent._meldfout("Please enter search criteria or press cancel")
+            self._parent._meldfout(
+                "Please enter search criteria or press cancel"
+            )
             self.txt_element.setFocus()
             return
 
         self._parent.search_args = (ele, attr_name, attr_val, text)
         super().accept()
 
-    ## def on_cancel(self):
-    ## super().done(qtw.QDialog.Rejected)
+    # def on_cancel(self):
+    #     super().done(qtw.QDialog.Rejected)
 
 
 class VisualTree(qtw.QTreeWidget):
@@ -194,30 +210,30 @@ class VisualTree(qtw.QTreeWidget):
         self.parent = parent
         super().__init__()
 
-    def mouseDoubleClickEvent(self, event):
+    def mouseDoubleClickEvent(self, event):  # noqa N802
         "reimplemented to reject when on root element"
         item = self.itemAt(event.x(), event.y())
         if item:
             if item == self.parent.top:
                 edit = False
             else:
-                ## data = str(item.text(0))
+                # data = str(item.text(0))
                 edit = True
-                ## if data.startswith(ELSTART):
-                ## if item.childCount() > 0:
-                ## edit = False
+                # if data.startswith(ELSTART):
+                # if item.childCount() > 0:
+                # edit = False
         if edit:
             self.parent.edit()
         else:
             event.ignore()
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event):  # noqa N802
         "reimplemented to show popup menu when applicable"
         if event.button() == core.Qt.RightButton:
             xc, yc = event.x(), event.y()
             item = self.itemAt(xc, yc)
             if item and item != self.parent.top:
-                ## self.parent.setCurrentItem(item)
+                # self.parent.setCurrentItem(item)
                 menu = self.parent._init_menus(popup=True)
                 menu.exec_(core.QPoint(xc, yc))
             else:
@@ -246,7 +262,7 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
             "recursively add elements"
             self.item = rt
             rr = self._add_item(el)
-            ## log(calculate_location(self, rr))
+            # log(calculate_location(self, rr))
             # for attr in el.keys():
             #     h = el.get(attr)
             #     if not h:
@@ -281,9 +297,13 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
 
     # internals
     def _init_gui(self):
-        """Deze methode wordt aangeroepen door de __init__ van de mixin class"""
-        ## self.parent = parent
-        ## qtw.QMainWindow.__init__(self, parent) # aparte initialisatie net als voor mixin
+        """Deze methode wordt aangeroepen door de __init__ van de mixin class
+        (This method is called by the __init__ of the mixin class)
+        """
+        # self.parent = parent
+        # qtw.QMainWindow.__init__(self, parent)
+        # ^ aparte initialisatie net als voor mixin
+        #   (separate initialization just like for mixin)
         self._icon = gui.QIcon(axe_iconame)
         self.resize(620, 900)
         self.setWindowIcon(self._icon)
@@ -354,8 +374,8 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
 
         if popup:
             return searchmenu
-        ## else:
-        ## return filemenu, viewmenu, editmenu
+        # else:
+        #     return filemenu, viewmenu, editmenu
 
     def _meldinfo(self, text):
         """notify about some information"""
@@ -375,7 +395,8 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         """
         retval = dict(
             zip(
-                (qtw.QMessageBox.Yes, qtw.QMessageBox.No, qtw.QMessageBox.Cancel),
+                (qtw.QMessageBox.Yes, qtw.QMessageBox.No,
+                 qtw.QMessageBox.Cancel),
                 (1, 0, -1),
             )
         )
@@ -390,7 +411,9 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         return retval[h]
 
     def _ask_for_text(self, prompt):
-        """vraagt om tekst en retourneert het antwoord"""
+        """vraagt om tekst en retourneert het antwoord
+        (asks for text and returns the answer)
+        """
         self.in_dialog = True
         data, *_ = qtw.QInputDialog.getText(
             self, self.title, prompt, qtw.QLineEdit.Normal, ""
@@ -408,8 +431,8 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
     def _checkselection(self, message=True):
         """get the currently selected item
 
-        if there is no selection or the file title is selected, display a message
-        (if requested). Also return False in that case
+        If there is no selection or the file title is selected, display
+        a message (if requested). Also return False in that case
         """
         sel = True
         self.item = self.tree.currentItem()
@@ -426,7 +449,8 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         log("in _add_item for {} value {} attrs {}".format(name, value, attrs))
         if value is None:
             value = ""
-        itemtext = getshortname(((name, value), self.ns_prefixes, self.ns_uris))
+        itemtext = getshortname(((name, value), self.ns_prefixes,
+                                 self.ns_uris))
         new = qtw.QTreeWidgetItem()
         new.setText(0, itemtext)
         new.setData(0, core.Qt.UserRole, itemdict)
@@ -445,7 +469,9 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         """call up menu"""
         log("self.popupmenu called")
         menu = self._init_menus(popup=True)
-        menu.exec_(self.tree.mapToGlobal(self.tree.visualItemRect(item).bottomRight()))
+        menu.exec_(self.tree.mapToGlobal(
+            self.tree.visualItemRect(item).bottomRight()
+        ))
 
     def quit(self):
         "close the application"
@@ -468,8 +494,8 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
                         else:
                             self.tree.expandItem(item)
                             self.tree.setCurrentItem(item.child(0))
-                    ## else:
-                    ## self.edit()
+                    # else:
+                    #     self.edit()
                 skip = True
             elif ky == core.Qt.Key_Backspace:
                 if item.isExpanded():
@@ -510,11 +536,11 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         edt = SearchDialog(self, title="Search options").exec_()
         if edt == qtw.QDialog.Accepted:
             self.search_next(reverse)
-            ## found, is_attr = find_next(flatten_tree(self.top), self.search_args,
-            ## reversed) # self.tree.top.child(0)
-            ## if found:
-            ## self.tree.setCurrentItem(found)
-            ## self._search_pos = (found, is_attr)
+            # found, is_attr = find_next(flatten_tree(self.top),
+            # self.search_args, reversed) # self.tree.top.child(0)
+            # if found:
+            # self.tree.setCurrentItem(found)
+            # self._search_pos = (found, is_attr)
 
     def search_last(self):
         "start backwards search"
@@ -529,7 +555,7 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
             self.tree.setCurrentItem(found)
             self._search_pos = (found, is_attr)
         else:
-            self._meldinfo("Niks (meer) gevonden")
+            self._meldinfo(_("Niks (meer) gevonden"))
 
     def search_prev(self):
         "find backwards"

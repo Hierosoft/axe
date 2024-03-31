@@ -1,9 +1,18 @@
 """Voorstudie voor een DTD editor (wxPython versie) - not actively maintained
 """
 
-import os, sys, shutil, copy
+import os
+import sys
+import shutil
+# import copy
+import wx
+
 from xml.etree.ElementTree import Element, ElementTree, SubElement
 from . import parsedtd as pd
+
+
+# Ignore uppercase letters in variable names:
+# noqa N806
 
 ELTYPES = ("pcdata", "one", "opt", "mul", "mulopt")
 ATTTYPES = ("cdata", "enum", "id")
@@ -22,8 +31,8 @@ SYMBOLS = {
         "cdata": ("[CDATA]", "character data"),
         "enum": ("[enum]", "enumerated values"),
         "id": ("[ID]", "id"),
-        ## 'IDREF': ('[=>]', 'related id'),
-        ## 'IDREFS': ('[=>>]', 'list of related ids')
+        # 'IDREF': ('[=>]', 'related id'),
+        # 'IDREFS': ('[=>>]', 'list of related ids')
     },
     "attwrd": {
         "fix": ("[#FIXED]", "fixed value"),
@@ -49,8 +58,6 @@ testdtd = """\
 <!ENTITY writer "Donald Duck.">
 <!ENTITY copyright SYSTEM "http://www.w3schools.com/entities.dtd">
 """
-
-import wx
 
 if os.name == "ce":
     DESKTOP = False
@@ -144,7 +151,7 @@ class ElementDialog(wx.Dialog):
         self.bOk = wx.Button(self.pnl, id=wx.ID_SAVE)
         self.bOk.Bind(wx.EVT_BUTTON, self.on_ok)
         self.bCancel = wx.Button(self.pnl, id=wx.ID_CANCEL)
-        ## self.bCancel.Bind(wx.EVENT_BUTTON,self.on_cancel)
+        # self.bCancel.Bind(wx.EVENT_BUTTON,self.on_cancel)
         self.SetAffirmativeId(wx.ID_SAVE)
 
         tag = ""
@@ -160,14 +167,15 @@ class ElementDialog(wx.Dialog):
                 for ix, name in enumerate(ELTYPES):
                     if name == type:
                         self.rbTypes[ix].SetValue(True)
-            ## else:
-            ## self.rbTypes[2].SetValue(True)
+            # else:
+            #     self.rbTypes[2].SetValue(True)
             self.cbOpt.Value = opt
         sizer = wx.BoxSizer(wx.VERTICAL)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         hsizer.Add(lblName, 0, wx.ALIGN_CENTER_VERTICAL)
         hsizer.Add(self.txtTag, 0, wx.ALIGN_CENTER_VERTICAL)
-        sizer.Add(hsizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL, 5)
+        sizer.Add(hsizer, 0,
+                  wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL, 5)
         if not_root:
             hsizer = wx.BoxSizer(wx.HORIZONTAL)
             hsizer.Add(lblType, 0)
@@ -175,15 +183,20 @@ class ElementDialog(wx.Dialog):
             for rb in self.rbTypes:
                 vsizer.Add(rb)
             hsizer.Add(vsizer, 0, wx.TOP, 3)
-            sizer.Add(hsizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL, 5)
+            sizer.Add(hsizer, 0,
+                      wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL, 5)
             hsizer = wx.BoxSizer(wx.HORIZONTAL)
             hsizer.Add(self.cbOpt)
-            sizer.Add(hsizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL, 5)
+            sizer.Add(hsizer, 0,
+                      wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL, 5)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         hsizer.Add(self.bOk, 0, wx.EXPAND | wx.ALL, 2)
         hsizer.Add(self.bCancel, 0, wx.EXPAND | wx.ALL, 2)
         sizer.Add(
-            hsizer, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL, 2
+            hsizer,
+            0,
+            wx.ALL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL,
+            2
         )
         self.pnl.SetSizer(sizer)
         self.pnl.SetAutoLayout(True)
@@ -220,7 +233,7 @@ class ElementDialog(wx.Dialog):
                     self._parent.data["type"] = ELTYPES[ix]  # rb.LabelText
                     typed = True
             if not typed:
-                ## self.rbTypes[0].SetFocus()
+                # self.rbTypes[0].SetFocus()
                 wx.MessageBox(
                     "You MUST choose a type for this element",
                     self._parent.title,
@@ -233,7 +246,7 @@ class ElementDialog(wx.Dialog):
             self._parent.data["opt"] = False
         print(self._parent.data)
         ev.Skip()
-        ## self.end('ok')
+        # self.end('ok')
 
     def OnKeyUp(self, ev):
         ky = ev.GetKeyCode()
@@ -305,31 +318,41 @@ class AttributeDialog(wx.Dialog):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        hsizer.Add(lblName, 0, wx.ALIGN_CENTER_VERTICAL | wx.LEFT | wx.RIGHT, 5)
+        hsizer.Add(lblName, 0, wx.ALIGN_CENTER_VERTICAL | wx.LEFT | wx.RIGHT,
+                   5)
         hsizer.Add(self.txtName, 1, wx.EXPAND | wx.ALIGN_CENTER_VERTICAL)
-        sizer.Add(hsizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL, 5)
+        sizer.Add(hsizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL,
+                  5)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        hsizer.Add(lblType, 0, wx.ALIGN_CENTER_VERTICAL | wx.LEFT | wx.RIGHT, 5)
+        hsizer.Add(lblType, 0, wx.ALIGN_CENTER_VERTICAL | wx.LEFT | wx.RIGHT,
+                   5)
         hsizer.Add(self.cmbType, 0, wx.EXPAND | wx.ALIGN_CENTER_VERTICAL)
-        sizer.Add(hsizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL, 5)
+        sizer.Add(hsizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL,
+                  5)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         hsizer.Add(lblWrd, 0, wx.LEFT | wx.RIGHT, 5)
         vsizer = wx.BoxSizer(wx.VERTICAL)
-        ## print self.rbTypes
+        # print self.rbTypes
         for rb in self.rbWrds:
             vsizer.Add(rb)
         hsizer.Add(vsizer, 0, wx.TOP, 3)
-        sizer.Add(hsizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL, 5)
+        sizer.Add(hsizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL,
+                  5)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        hsizer.Add(lblValue, 0, wx.ALIGN_CENTER_VERTICAL | wx.LEFT | wx.RIGHT, 5)
+        hsizer.Add(lblValue, 0, wx.ALIGN_CENTER_VERTICAL | wx.LEFT | wx.RIGHT,
+                   5)
         hsizer.Add(self.txtValue, 0, wx.EXPAND | wx.ALIGN_CENTER_VERTICAL)
         # hsizer.Add(self.bList,0,wx.EXPAND | wx.ALIGN_CENTER_VERTICAL)
-        sizer.Add(hsizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL, 5)
+        sizer.Add(hsizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL,
+                  5)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         hsizer.Add(self.bOk, 0, wx.EXPAND | wx.ALL, 2)
         hsizer.Add(self.bCancel, 0, wx.EXPAND | wx.ALL, 2)
         sizer.Add(
-            hsizer, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL, 2
+            hsizer,
+            0,
+            wx.ALL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL,
+            2
         )
 
         self.pnl.SetSizer(sizer)
@@ -355,13 +378,15 @@ class AttributeDialog(wx.Dialog):
         if self.rbWrds[2].Value and val == "":
             self.txtValue.SetFocus()
             wx.MessageBox(
-                "Vaste waarde opgeven", self._parent.title, wx.OK | wx.ICON_ERROR
+                "Vaste waarde opgeven",
+                self._parent.title, wx.OK | wx.ICON_ERROR
             )
             return
         if self.rbWrds[3].Value and val == "":
             self.txtValue.SetFocus()
             wx.MessageBox(
-                "Default waarde opgeven", self._parent.title, wx.OK | wx.ICON_ERROR
+                "Default waarde opgeven",
+                self._parent.title, wx.OK | wx.ICON_ERROR
             )
             return
         self._parent.data["name"] = nam
@@ -372,7 +397,7 @@ class AttributeDialog(wx.Dialog):
             if rb.Value:
                 self._parent.data["opt"] = VALTYPES[ix]
         self._parent.data["val"] = val
-        ## self.end('ok')
+        # self.end('ok')
         print(self._parent.data)
         ev.Skip()
 
@@ -419,7 +444,8 @@ class EntityDialog(wx.Dialog):
         # self.txtValue.Bind(wx.EVT_KEY_UP,self.OnKeyUp)
         lblType = wx.StaticText(self.pnl, -1, "Definition:  ")
         self.rbTypes = [
-            wx.RadioButton(self.pnl, -1, label=SYMBOLS["entsrt"][name][1] + ": ")
+            wx.RadioButton(self.pnl, -1,
+                           label=SYMBOLS["entsrt"][name][1] + ": ")
             for name in ENTTYPES
         ]
         self.txtVal = wx.TextCtrl(self.pnl, -1, size=(100, -1))
@@ -427,7 +453,7 @@ class EntityDialog(wx.Dialog):
         self.bOk = wx.Button(self.pnl, id=wx.ID_SAVE)
         self.bOk.Bind(wx.EVT_BUTTON, self.on_ok)
         self.bCancel = wx.Button(self.pnl, id=wx.ID_CANCEL)
-        ## self.bCancel.Bind(wx.EVT_BUTTON,self.on_cancel)
+        # self.bCancel.Bind(wx.EVT_BUTTON,self.on_cancel)
         self.SetAffirmativeId(wx.ID_SAVE)
 
         nam = val = srt = url = ""
@@ -449,9 +475,11 @@ class EntityDialog(wx.Dialog):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        hsizer.Add(lblName, 0, wx.ALIGN_CENTER_VERTICAL | wx.LEFT | wx.RIGHT, 5)
+        hsizer.Add(lblName, 0, wx.ALIGN_CENTER_VERTICAL | wx.LEFT | wx.RIGHT,
+                   5)
         hsizer.Add(self.txtName, 1, wx.EXPAND)
-        sizer.Add(hsizer, 1, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL, 5)
+        sizer.Add(hsizer, 1, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL,
+                  5)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         hsizer.Add(lblType, 0, wx.TOP | wx.LEFT | wx.RIGHT, 5)
         # hsizer.Add(lblValue,0,wx.ALIGN_CENTER_VERTICAL | wx.LEFT|wx.RIGHT,5)
@@ -462,17 +490,23 @@ class EntityDialog(wx.Dialog):
             hhsizer = wx.BoxSizer(wx.HORIZONTAL)
             hhsizer.Add(rb, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 1)
             if ix == 0:
-                hhsizer.Add(self.txtVal, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 1)
+                hhsizer.Add(self.txtVal, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL,
+                            1)
             elif ix == 1:
-                hhsizer.Add(self.txtUrl, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 1)
+                hhsizer.Add(self.txtUrl, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL,
+                            1)
             vsizer.Add(hhsizer)
         hsizer.Add(vsizer, 0)
-        sizer.Add(hsizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL, 5)
+        sizer.Add(hsizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL,
+                  5)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         hsizer.Add(self.bOk, 0, wx.EXPAND | wx.ALL, 2)
         hsizer.Add(self.bCancel, 0, wx.EXPAND | wx.ALL, 2)
         sizer.Add(
-            hsizer, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL, 2
+            hsizer,
+            0,
+            wx.ALL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL,
+            2
         )
 
         self.pnl.SetSizer(sizer)
@@ -499,11 +533,13 @@ class EntityDialog(wx.Dialog):
             return
         if ent and val == "":
             self.txtVal.SetFocus()
-            wx.MessageBox("Waarde opgeven", self._parent.title, wx.OK | wx.ICON_ERROR)
+            wx.MessageBox("Waarde opgeven",
+                          self._parent.title, wx.OK | wx.ICON_ERROR)
             return
         if ext and url == "":
             self.txtUrl.SetFocus()
-            wx.MessageBox("Url opgeven", self._parent.title, wx.OK | wx.ICON_ERROR)
+            wx.MessageBox("Url opgeven",
+                          self._parent.title, wx.OK | wx.ICON_ERROR)
             return
         self._parent.data["name"] = nam
         # self._parent.data["value"] = self.txtValue.GetValue()
@@ -513,7 +549,7 @@ class EntityDialog(wx.Dialog):
         elif ext:
             self._parent.data["srt"] = "ext"
             self._parent.data["val"] = url
-        ## self.end('ok')
+        # self.end('ok')
         print(self._parent.data)
         ev.Skip()
 
@@ -546,7 +582,7 @@ class MainFrame(wx.Frame):
         self.SetMenuBar(menuBar)
 
         self.enable_pasteitems(False)
-        ## self.helpmenu.append('About', callback = self.about)
+        # self.helpmenu.append('About', callback = self.about)
 
         self.pnl = wx.Panel(self, -1)
         self.tree = wx.TreeCtrl(self.pnl, -1)
@@ -636,7 +672,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.paste_aft, mitem)
         if popup:
             if not self.cut_el and not self.cut_att and not self.cut_ent:
-                ## mitem.SetItemLabel(" ")
+                # mitem.SetItemLabel(" ")
                 mitem.Enable(False)
         else:
             self.pasteafter_item = mitem
@@ -645,7 +681,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.paste_und, mitem)
         if popup:
             if not self.cut_el and not self.cut_att and not self.cut_ent:
-                ## mitem.SetItemLabel(" ")
+                # mitem.SetItemLabel(" ")
                 mitem.Enable(False)
         else:
             self.pasteunder_item = mitem
@@ -680,17 +716,18 @@ class MainFrame(wx.Frame):
         self.pasteafter_item.Enable(active)
 
     def newxml(self, ev=None):
-        h = wx.Dialog.askstring("AXE", "Enter a name (tag) for the root element")
+        h = wx.Dialog.askstring("AXE",
+                                "Enter a name (tag) for the root element")
         if h is not None:
             self.init_tree("(untitled)")
 
     def openxml(self, ev=None):
-        ## self.openfile()
-        ## try:
+        # self.openfile()
+        # try:
         email = pd.DTDParser(fromstring=testdtd)
-        ## except pd.DTDParsingError,msg:
-        ## print msg
-        ## return
+        # except pd.DTDParsingError,msg:
+        # print msg
+        # return
         self.rt = email
         self.init_tree()
 
@@ -716,7 +753,8 @@ class MainFrame(wx.Frame):
             h = dlg.GetPath()
             if not self._openfile(h):
                 dlg = wx.MessageBox(
-                    "dtd parsing error", self.title, wx.OK | wx.ICON_INFORMATION
+                    "dtd parsing error",
+                    self.title, wx.OK | wx.ICON_INFORMATION
                 )
                 dlg.ShowModal()
                 dlg.Destroy()
@@ -728,7 +766,7 @@ class MainFrame(wx.Frame):
             while tag.IsOk():
                 text = self.tree.GetItemText(tag)
                 data = self.tree.GetItemPyData(tag)
-                ## print text,data[0],data[1]
+                # print text,data[0],data[1]
                 if text.startswith(ELSTART):
                     node = SubElement(root, data[0])
                     if data[1]:
@@ -742,7 +780,7 @@ class MainFrame(wx.Frame):
         try:
             shutil.copyfile(self.xmlfn, self.xmlfn + ".bak")
         except IOError as mld:
-            ## wx.MessageBox(str(mld),self.title,wx.OK|wx.ICON_ERROR)
+            # wx.MessageBox(str(mld),self.title,wx.OK|wx.ICON_ERROR)
             pass
         top = self.tree.GetRootItem()
         rt = self.tree.GetLastChild(top)
@@ -753,7 +791,7 @@ class MainFrame(wx.Frame):
         h = ElementTree(root).write(self.xmlfn, encoding="iso-8859-1")
 
     def savexml(self, ev=None):
-        ## print "savexml(): ", self.xmlfn
+        # print "savexml(): ", self.xmlfn
         if self.xmlfn == "":
             self.savexmlas()
         else:
@@ -761,7 +799,7 @@ class MainFrame(wx.Frame):
 
     def savexmlas(self, ev=None):
         d, f = os.path.split(self.xmlfn)
-        ## print "savexmlas(): ", d,f
+        # print "savexmlas(): ", d,f
         dlg = wx.FileDialog(
             self,
             message="Save file as ...",
@@ -772,7 +810,7 @@ class MainFrame(wx.Frame):
         )
         if dlg.ShowModal() == wx.ID_OK:
             self.xmlfn = dlg.GetPath()
-            ## print "savexmlas(): ", self.xmlfn
+            # print "savexmlas(): ", self.xmlfn
             self.savexmlfile()  # oldfile=os.path.join(d,f))
             self.tree.SetItemText(self.top, self.xmlfn)
             self.SetTitle(" - ".join((os.path.split(self.xmlfn)[-1], TITEL)))
@@ -813,32 +851,35 @@ class MainFrame(wx.Frame):
         self.top = self.tree.AddRoot(titel)
         self.SetTitle(" - ".join((os.path.split(titel)[-1], TITEL)))
 
-        ## de in self.openxml ingelezen structuur self.rt bevat (in dit geval):
-        ## [<parsedtd._Element object at 0x2527c50>,
-        ## <parsedtd._Entity object at 0x2527f90>,
-        ## <parsedtd._Entity object at 0x2527f50>]
+        # de in self.openxml ingelezen structuur self.rt bevat (in dit geval)
+        # (The structure read into self.openxml contains self.rt in this case):
+        # [<parsedtd._Element object at 0x2527c50>,
+        # <parsedtd._Entity object at 0x2527f90>,
+        # <parsedtd._Entity object at 0x2527f50>]
 
-        ## het _Element object bevat de attributen:
-        ## type: 'ANY',
-        ## name: 'note',
-        ## occurrence: '',
-        ## entity_list: [],
-        ## attribute_list: [],
-        ## is_alternative: False,
-        ## subelement_list: [
-        ## <parsedtd._Element object at 0x176dcd0>,
-        ## <parsedtd._Element object at 0x176dd50>,
-        ## <parsedtd._Element object at 0x176dd90>,
-        ## <parsedtd._Element object at 0x176ddd0>],
-        ## en de _entity objecten:
-        ## type: 'ent',
-        ## name: 'writer',
-        ## value: 'Donald Duck.'
-        ## en
-        ## type: 'ext',
-        ## name: 'copyright',
-        ## value: 'http://www.w3schools.com/entities.dtd'
-
+        # het _Element object bevat de attributen
+        # (The _Element object contains the attributes):
+        """
+        type: 'ANY',
+        name: 'note',
+        occurrence: '',
+        entity_list: [],
+        attribute_list: [],
+        is_alternative: False,
+        subelement_list: [
+        <parsedtd._Element object at 0x176dcd0>,
+        <parsedtd._Element object at 0x176dd50>,
+        <parsedtd._Element object at 0x176dd90>,
+        <parsedtd._Element object at 0x176ddd0>],
+        en de _entity objecten:
+        type: 'ent',
+        name: 'writer',
+        value: 'Donald Duck.'
+        en
+        type: 'ext',
+        name: 'copyright',
+        value: 'http://www.w3schools.com/entities.dtd'
+        """
         h = (self.rt.tag, "one", False)
         rt = self.tree.AppendItem(self.top, getshortname(h))
         self.tree.SetItemPyData(rt, h)
@@ -855,7 +896,8 @@ class MainFrame(wx.Frame):
             elif self.item is not None:
                 wx.context_menu(self, ev, self.editmenu)
             else:
-                wx.Message.ok(self.title, "You need to select a tree item first")
+                wx.Message.ok(self.title,
+                              "You need to select a tree item first")
                 # menu.append()
         else:
             ev.skip()
@@ -869,9 +911,9 @@ class MainFrame(wx.Frame):
             else:
                 data = self.tree.GetItemText(item)
                 edit = True
-                ## if data.startswith(ELSTART):
-                ## if self.tree.GetChildrenCount(item):
-                ## edit = False
+                # if data.startswith(ELSTART):
+                # if self.tree.GetChildrenCount(item):
+                # edit = False
         if edit:
             self.edit()
         ev.Skip()
@@ -883,9 +925,9 @@ class MainFrame(wx.Frame):
             self.tree.SelectItem(item)
             menu = self.init_menus(popup=True)
             self.PopupMenu(menu)
-            ## print "klaar met menu"
+            # print "klaar met menu"
             menu.Destroy()
-        ## pass
+        # pass
 
     def OnKeyUp(self, ev=None):
         pt = ev.GetPosition()
@@ -924,7 +966,8 @@ class MainFrame(wx.Frame):
             return
         test = self.tree.GetItemText(self.item)  # self.item.get_text()
         if is_element(test):
-            tag, type, opt = self.tree.GetItemPyData(self.item)  # self.item.get_data()
+            tag, type, opt = self.tree.GetItemPyData(self.item)
+            # ^ self.item.get_data()
             data = {"item": self.item, "tag": tag, "type": type, "opt": opt}
             if tag == self.rt.tag:
                 edt = ElementDialog(
@@ -940,7 +983,8 @@ class MainFrame(wx.Frame):
             nam, srt, opt, val = self.tree.GetItemPyData(
                 self.item
             )  # self.item.get_data()
-            data = {"item": self.item, "name": nam, "srt": srt, "opt": opt, "val": val}
+            data = {"item": self.item, "name": nam, "srt": srt, "opt": opt,
+                    "val": val}
             edt = AttributeDialog(self, title="Edit an attribute", item=data)
             if edt.ShowModal() == wx.ID_SAVE:
                 h = (
@@ -952,7 +996,8 @@ class MainFrame(wx.Frame):
                 self.tree.SetItemText(self.item, getshortname(h, attr=True))
                 self.tree.SetItemPyData(self.item, h)
         elif is_entitydef(test):
-            nam, srt, val = self.tree.GetItemPyData(self.item)  # self.item.get_data()
+            nam, srt, val = self.tree.GetItemPyData(self.item)
+            # ^ self.item.get_data()
             data = {"item": self.item, "name": nam, "srt": srt, "val": val}
             edt = EntityDialog(self, title="Edit an attribute", item=data)
             if edt.ShowModal() == wx.ID_SAVE:
@@ -969,7 +1014,8 @@ class MainFrame(wx.Frame):
     def delete(self, ev=None):
         self.copy(cut=True, retain=False)
 
-    def copy(self, ev=None, cut=False, retain=True):  # retain is t.b.v. delete functie
+    def copy(self, ev=None, cut=False, retain=True):
+        # ^ retain is t.b.v. delete functie
         def push_el(el, result):
             # print "start: ",result
             text = self.tree.GetItemText(el)
@@ -993,16 +1039,19 @@ class MainFrame(wx.Frame):
         txt = "cut" if cut else "copy"
         txt = txt if retain else "delete"
         if data == (self.rt.tag, "one", False):
-            wx.MessageBox("Can't %s the root" % txt, self.title, wx.OK | wx.ICON_ERROR)
+            wx.MessageBox("Can't %s the root" % txt,
+                          self.title, wx.OK | wx.ICON_ERROR)
             return
-        ## print "copy(): print text,data"
-        ## print text,data
+        # print "copy(): print text,data"
+        # print text,data
         if retain:
             self.cut_el = None
             self.cut_att = None
             self.cut_ent = None
             if is_element(text):
-                ## self.cut_el = self.item # hmmm... hier moet de aanroep van push_el komen
+                # self.cut_el = self.item
+                # ^ hmmm... hier moet de aanroep van push_el komen
+                #   (this is where the push_el call should come)
                 self.cut_el = []
                 self.cut_el = push_el(self.item, self.cut_el)
             elif is_attribute(text):
@@ -1023,18 +1072,21 @@ class MainFrame(wx.Frame):
             text = self.tree.GetItemText(self.item)
             if not is_element(text):
                 wx.MessageBox(
-                    "Can't paste under a non-element", self.title, wx.OK | wx.ICON_ERROR
+                    "Can't paste under a non-element",
+                    self.title, wx.OK | wx.ICON_ERROR
                 )
                 return
             if is_pcdata(text):
                 wx.MessageBox(
-                    "Can't paste under PCDATA", self.title, wx.OK | wx.ICON_ERROR
+                    "Can't paste under PCDATA",
+                    self.title, wx.OK | wx.ICON_ERROR
                 )
                 return
         if data == self.rt:
             if before:
                 wx.MessageBox(
-                    "Can't paste before the root", self.title, wx.OK | wx.ICON_ERROR
+                    "Can't paste before the root",
+                    self.title, wx.OK | wx.ICON_ERROR
                 )
                 return
             else:
@@ -1051,11 +1103,18 @@ class MainFrame(wx.Frame):
         if self.cut_el:
 
             def zetzeronder(node, el, pos=-1):
-                ## print "zetzeronder()"
-                ## print "node: ",node
-                ## print "el:", el
-                ## item = self.tree.GetItemText(el)
-                ## data = self.tree.GetItemPyData(el)
+                """Put Zero Under
+
+                Args:
+                    node (_type_): Node
+                    el (_type_): Element
+                    pos (int, optional): _description_. Defaults to -1.
+                """
+                # print "zetzeronder()"
+                # print "node: ",node
+                # print "el:", el
+                # item = self.tree.GetItemText(el)
+                # data = self.tree.GetItemPyData(el)
                 if pos == -1:
                     subnode = self.tree.AppendItem(node, el[0])
                     self.tree.SetItemPyData(subnode, el[1])
@@ -1069,7 +1128,8 @@ class MainFrame(wx.Frame):
                 node = self.item
                 i = -1
             else:
-                node = self.tree.GetItemParent(self.item)  # self.item.get_parent()
+                # self.item.get_parent()
+                node = self.tree.GetItemParent(self.item)
                 x, c = self.tree.GetFirstChild(node)
                 cnt = self.tree.GetChildrenCount(node)
                 for i in range(cnt):
@@ -1092,7 +1152,8 @@ class MainFrame(wx.Frame):
                 node = self.tree.AppendItem(self.item, item)
                 self.tree.SetItemPyData(node, data)
             else:
-                add_to = self.tree.GetItemParent(self.item)  # self.item.get_parent()
+                # self.item.get_parent()
+                add_to = self.tree.GetItemParent(self.item)
                 added = False
                 x, c = self.tree.GetFirstChild(add_to)
                 for i in range(self.tree.GetChildrenCount(add_to)):
@@ -1120,7 +1181,8 @@ class MainFrame(wx.Frame):
         text = self.tree.GetItemText(self.item)
         if not is_element(text):
             wx.MessageBox(
-                "Can't insert under a non-element", self.title, wx.OK | wx.ICON_ERROR
+                "Can't insert under a non-element",
+                self.title, wx.OK | wx.ICON_ERROR
             )
             return
         if is_pcdata(text):
@@ -1146,7 +1208,8 @@ class MainFrame(wx.Frame):
         text = self.tree.GetItemText(self.item)
         if not is_element(text):
             wx.MessageBox(
-                "Can't insert under a non-element", self.title, wx.OK | wx.ICON_ERROR
+                "Can't insert under a non-element",
+                self.title, wx.OK | wx.ICON_ERROR
             )
             return
         if is_pcdata(text):
@@ -1175,7 +1238,8 @@ class MainFrame(wx.Frame):
                 return
             if is_pcdata(text):
                 wx.MessageBox(
-                    "Can't insert under PCDATA", self.title, wx.OK | wx.ICON_ERROR
+                    "Can't insert under PCDATA",
+                    self.title, wx.OK | wx.ICON_ERROR
                 )
                 return
         if (
@@ -1183,7 +1247,8 @@ class MainFrame(wx.Frame):
             and not below
         ):
             wx.MessageBox(
-                "Can't insert before/after the root", self.title, wx.OK | wx.ICON_ERROR
+                "Can't insert before/after the root", self.title,
+                wx.OK | wx.ICON_ERROR
             )
             return
         edt = ElementDialog(self, title="New element")
@@ -1195,7 +1260,7 @@ class MainFrame(wx.Frame):
                 self.tree.SetItemPyData(rt, data)
             else:
                 parent = self.tree.GetItemParent(self.item)
-                item = self.item if not before else self.tree.GetPrevSibling(self.item)
+                item = self.item if not before else self.tree.GetPrevSibling(self.item)  # noqa E501
                 node = self.tree.InsertItem(parent, item, text)
                 self.tree.SetPyData(node, data)
         edt.Destroy()
@@ -1254,8 +1319,8 @@ def test_is_entitydef():
 
 
 if __name__ == "__main__":
-    ## print sys.argv
-    ## test_is_element()
-    ## test_is_attribute()
-    ## test_is_entitydef()
+    # print sys.argv
+    # test_is_element()
+    # test_is_attribute()
+    # test_is_entitydef()
     MainGui(sys.argv)

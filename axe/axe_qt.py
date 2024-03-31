@@ -1,15 +1,27 @@
 """PyQT5 versie van een op een treeview gebaseerde XML-editor
+(PyQT5 version of a treeview-based XML editor)
 """
 
 import os
 import sys
 
-## import functools
-import PyQt5.QtWidgets as qtw
-import PyQt5.QtGui as gui
-import PyQt5.QtCore as core
+# import functools
+import PyQt5.QtWidgets as qtw  # noqa N813
+import PyQt5.QtGui as gui  # noqa N813
+import PyQt5.QtCore as core  # noqa N813
 from .axe_base import getshortname, find_next, XMLTree, AxeMixin, log
-from .axe_base import ELSTART, TITEL, axe_iconame, MixinError
+from .axe_base import (
+    ELSTART,
+    TITEL,
+    axe_iconame,
+    # MixinError,
+)
+
+# Normally:
+# import gettext
+# _ = gettext.gettext
+# But we don't have a language selection yet, so use our own:
+from axe.intl import _
 
 if os.name == "nt":
     HMASK = "XML files (*.xml);;All files (*.*)"
@@ -19,11 +31,12 @@ IMASK = "All files (*.*)"
 
 
 def calculate_location(win, node):
-    """attempt to calculate some kind of identification for a tree node
+    """Attempt to calculate some kind of identification for a tree node.
 
-    this function returns a tuple of subsequent indices of a child under its
-    parent.
-    possibly this can be used in the replacements dictionary
+
+    Returns:
+        tuple: subsequent indices of a child under its parent, which
+            possibly can be used in the replacements dictionary.
     """
     id_ = []
     while node != win.top:
@@ -38,7 +51,8 @@ def flatten_tree(element):
     probably nicer as a generator function
     """
     attr_list = []
-    elem_list = [(element, str(element.text(1)), str(element.text(2)), attr_list)]
+    elem_list = [(element, str(element.text(1)), str(element.text(2)),
+                  attr_list)]
 
     subel_list = []
     for seq in range(element.childCount()):
@@ -47,7 +61,8 @@ def flatten_tree(element):
             subel_list = flatten_tree(subitem)
             elem_list.extend(subel_list)
         else:
-            attr_list.append((subitem, str(subitem.text(1)), str(subitem.text(2))))
+            attr_list.append((subitem, str(subitem.text(1)),
+                              str(subitem.text(2))))
     return elem_list
 
 
@@ -128,8 +143,8 @@ class ElementDialog(qtw.QDialog):
 
         self.setLayout(sizer)
 
-    ## def on_cancel(self):
-    ## super().done(qtw.QDialog.Rejected)
+    # def on_cancel(self):
+    #     super().done(qtw.QDialog.Rejected)
 
     def accept(self):
         """final checks, send changed data to parent"""
@@ -158,7 +173,7 @@ class ElementDialog(qtw.QDialog):
         self._parent.data["text"] = self.txt_data.toPlainText()
         super().accept()
 
-    def keyPressEvent(self, event):
+    def keyPressEvent(self, event):  # noqa N802
         """reimplemented event handler voor toetsaanslagen"""
         if event.key() == core.Qt.Key_Escape:
             super().done(qtw.QDialog.Rejected)
@@ -233,7 +248,7 @@ class AttributeDialog(qtw.QDialog):
         sizer.addLayout(hsizer)
 
         self.setLayout(sizer)
-        ## self.resize(320,125)
+        # self.resize(320,125)
 
     def accept(self):
         """final checks, transmit changes to parent"""
@@ -261,11 +276,11 @@ class AttributeDialog(qtw.QDialog):
         self._parent.data["value"] = self.txt_value.text()
         super().accept()
 
-    ## def on_cancel(self):
-    ## super().done(qtw.QDialog.Rejected)
+    # def on_cancel(self):
+    #     super().done(qtw.QDialog.Rejected)
 
-    def keyPressEvent(self, event):
-        """event handler voor toetsaanslagen"""
+    def keyPressEvent(self, event):  # noqa N802
+        """event handler voor toetsaanslagen (keystroke event handler)"""
         if event.key() == core.Qt.Key_Escape:
             super().done(qtw.QDialog.Rejected)
 
@@ -393,15 +408,17 @@ class SearchDialog(qtw.QDialog):
         attr_val = str(self.txt_attr_val.text())
         text = str(self.txt_text.text())
         if not any((ele, attr_name, attr_val, text)):
-            self._parent._meldfout("Please enter search criteria or press cancel")
+            self._parent._meldfout(
+                "Please enter search criteria or press cancel"
+            )
             self.txt_element.setFocus()
             return
 
         self._parent.search_args = (ele, attr_name, attr_val, text)
         super().accept()
 
-    ## def on_cancel(self):
-    ## super().done(qtw.QDialog.Rejected)
+    # def on_cancel(self):
+    #     super().done(qtw.QDialog.Rejected)
 
 
 class VisualTree(qtw.QTreeWidget):
@@ -411,30 +428,30 @@ class VisualTree(qtw.QTreeWidget):
         self.parent = parent
         super().__init__()
 
-    def mouseDoubleClickEvent(self, event):
+    def mouseDoubleClickEvent(self, event):  # noqa N802
         "reimplemented to reject when on root element"
         item = self.itemAt(event.x(), event.y())
         if item:
             if item == self.parent.top:
                 edit = False
             else:
-                ## data = str(item.text(0))
+                # data = str(item.text(0))
                 edit = True
-                ## if data.startswith(ELSTART):
-                ## if item.childCount() > 0:
-                ## edit = False
+                # if data.startswith(ELSTART):
+                # if item.childCount() > 0:
+                # edit = False
         if edit:
             self.parent.edit()
         else:
             event.ignore()
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event):  # noqa N802
         "reimplemented to show popup menu when applicable"
         if event.button() == core.Qt.RightButton:
             xc, yc = event.x(), event.y()
             item = self.itemAt(xc, yc)
             if item and item != self.parent.top:
-                ## self.parent.setCurrentItem(item)
+                # self.parent.setCurrentItem(item)
                 menu = self.parent._init_menus(popup=True)
                 menu.exec_(core.QPoint(xc, yc))
             else:
@@ -447,13 +464,13 @@ class UndoRedoStack(qtw.QUndoStack):
     """Undo stack subclass overriding some event handlers"""
 
     def __init__(self, parent):
-        ## super().__init__(parent)
+        # super().__init__(parent)
         super().__init__(parent)
         self.cleanChanged.connect(self.clean_changed)
         self.indexChanged.connect(self.index_changed)
         self.maxundo = self.undoLimit()
         self.setUndoLimit(1)  # self.unset_undo_limit(False)
-        ## log('Undo limit {}'.format(self.undoLimit()))
+        # log('Undo limit {}'.format(self.undoLimit()))
         win = self.parent()
         win.undo_item.setText("Nothing to undo")
         win.redo_item.setText("Nothing to redo")
@@ -469,14 +486,14 @@ class UndoRedoStack(qtw.QUndoStack):
         else:
             self.setUndoLimit(1)
             nolim, yeslim = "", " to one"
-        ## self.parent().setundo_action.setChecked(state)
+        # self.parent().setundo_action.setChecked(state)
         self.parent().statusbar.showMessage(
             "Undo level is now {}limited{}".format(nolim, yeslim)
         )
 
     def clean_changed(self, state):
         """change text of undo/redo menuitems according to stack change"""
-        ## print('undo stack status changed:', state)
+        # print('undo stack status changed:', state)
         win = self.parent()
         if state:
             win.undo_item.setText("Nothing to undo")
@@ -486,7 +503,7 @@ class UndoRedoStack(qtw.QUndoStack):
         self,
     ):  # , num): currently only change from 1 to unlimited and back
         """change text of undo/redo menuitems according to stack change"""
-        ## print('undo stack index changed:', num)
+        # print('undo stack index changed:', num)
         win = self.parent()
         test = self.undoText()
         if test:
@@ -508,18 +525,25 @@ class UndoRedoStack(qtw.QUndoStack):
 class PasteElementCommand(qtw.QUndoCommand):
     """subclass to make Undo/Redo possible"""
 
-    def __init__(
-        self, win, tag, text, before, below, description="", data=None, where=None
-    ):
+    def __init__(self, win, tag, text, before, below, description="",
+                 data=None, where=None):
         """
-        "where we are" is optional because it can be determined from the current
-        position but it should also be possible to provide it
+        Args:
+            win (Treewidget): treewidget
+            tag (str): element name
+            text (str): element text
+            before (bool): switch
+            below (bool): switch
+            description (str): description of action
+            where (QWidget ??, optional): "where we are," optional
+                because it can be determined from the current position
+                but it should also be possible to provide it.
         """
-        self.win = win  # treewidget
-        self.tag = tag  # element name
-        self.data = text  # element text
-        self.before = before  # switch
-        self.below = below  # switch
+        self.win = win
+        self.tag = tag
+        self.data = text
+        self.before = before
+        self.below = below
         self.children = data
         self.where = where
         self.replaced = None  # in case item is replaced while redoing
@@ -529,7 +553,8 @@ class PasteElementCommand(qtw.QUndoCommand):
             description += " Before"
         else:
             description += " After"
-        log("init {} {} {}".format(description, self.tag, self.data))  # , self.item)
+        log("init {} {} {}".format(description, self.tag, self.data))
+        # , self.item)
         self.first_edit = not self.win.tree_dirty
         super().__init__(description)
 
@@ -538,7 +563,8 @@ class PasteElementCommand(qtw.QUndoCommand):
 
         def zetzeronder(node, data, before=False, below=True):
             "add elements recursively"
-            log("zetzeronder voor node {} met data {}".format(node, data))
+            log(_("zetzeronder voor node {node} met data {data}")
+                .format(node=node, data=data))
             text, data, children = data
             tag, value = data
             self.win.item = node
@@ -556,28 +582,30 @@ class PasteElementCommand(qtw.QUndoCommand):
         print("    data is", self.data)
         print("    before is", self.before)
         print("    below is", self.below)
-        ## self.win.item = self.item
-        log("In paste element redo for tag {} data {}".format(self.tag, self.data))
+        # self.win.item = self.item
+        log("In paste element redo for tag {} data {}"
+            "".format(self.tag, self.data))
         if self.where:
             self.win.item = self.where
         print("    where is", self.where)
         self.added = self.win._add_item(
             self.tag, self.data, before=self.before, below=self.below
         )
-        log("newly added {} with children {}".format(self.added, self.children))
+        log("newly added {} with children {}"
+            "".format(self.added, self.children))
         if self.children is not None:
             for item in self.children[0][2]:
                 zetzeronder(self.added, item)
-        ## if self.replaced:
-        ## self.win.replaced[calculate_location(add_under)] = self.added
+        # if self.replaced:
+        # self.win.replaced[calculate_location(add_under)] = self.added
         self.win.tree.expandItem(self.added)
         log("self.added after adding children: {}".format(self.added))
 
     def undo(self):
         "Undo add element"
         # essentially 'cut' Command
-        log("In paste element undo for added".format(self.added))
-        self.replaced = self.added  # remember original item in case redo replaces it
+        log("In paste element undo for added: {}".format(self.added))
+        self.replaced = self.added  # remember original in case redo replaces
         item = CopyElementCommand(
             self.win, self.added, cut=True, retain=False, description=__doc__
         )
@@ -596,13 +624,15 @@ class PasteAttributeCommand(qtw.QUndoCommand):
         self.item = item  # where we are now
         self.name = name  # attribute name
         self.value = value  # attribute value
-        log("init {} {} {} {}".format(description, self.name, self.value, self.item))
+        log("init {} {} {} {}"
+            "".format(description, self.name, self.value, self.item))
         self.first_edit = not self.win.tree_dirty
         super().__init__(description)
 
     def redo(self):
         "(Re)Do add attribute"
-        log("(redo) add attr {} {} {}".format(self.name, self.value, self.item))
+        log("(redo) add attr {} {} {}"
+            "".format(self.name, self.value, self.item))
         self.win.item = self.item
         self.added = self.win._add_item(self.name, self.value, attr=True)
         self.win.tree.expandItem(self.added.parent())
@@ -658,7 +688,8 @@ class CopyElementCommand(qtw.QUndoCommand):
         self.item = item  # where we are now
         self.tag = str(self.item.text(1))
         self.data = str(self.item.text(2))  # name and text
-        log("init {} {} {} {}".format(description, self.tag, self.data, self.item))
+        log("init {} {} {} {}"
+            "".format(description, self.tag, self.data, self.item))
         self.cut = cut
         self.retain = retain
         self.first_edit = not self.win.tree_dirty
@@ -678,7 +709,8 @@ class CopyElementCommand(qtw.QUndoCommand):
             return result
 
         log(
-            "In copy element redo for item {} with data {}".format(self.item, self.data)
+            "In copy element redo for item {} with data {}"
+            "".format(self.item, self.data)
         )
         print("redo of ", self.item)
         if self.undodata is None:
@@ -744,7 +776,7 @@ class CopyElementCommand(qtw.QUndoCommand):
         if self.first_edit:
             self.win.mark_dirty(False)
         self.win.statusbar.showMessage("{} undone".format(self.text()))
-        ## self.win.tree.setCurrentItem(self.item)
+        # self.win.tree.setCurrentItem(self.item)
 
 
 class CopyAttributeCommand(qtw.QUndoCommand):
@@ -756,7 +788,8 @@ class CopyAttributeCommand(qtw.QUndoCommand):
         self.item = item  # where we are now
         self.name = str(self.item.text(1))
         self.value = str(self.item.text(2))  # name and text
-        log("init {} {} {} {}".format(description, self.name, self.value, self.item))
+        log("init {} {} {} {}"
+            "".format(description, self.name, self.value, self.item))
         self.cut = cut
         self.retain = retain
         self.first_edit = not self.win.tree_dirty
@@ -786,11 +819,13 @@ class CopyAttributeCommand(qtw.QUndoCommand):
 
     def undo(self):
         "Undo Copy attribute"
-        log("{} for {} {} {}".format(__doc__, self.name, self.value, self.item))
+        log("{} for {} {} {}"
+            "".format(__doc__, self.name, self.value, self.item))
         # self.win.cut_att = None
         if self.cut:
             item = PasteAttributeCommand(
-                self.win, self.name, self.value, self.parent, description=__doc__
+                self.win, self.name, self.value, self.parent,
+                description=__doc__
             )
             item.redo()
             self.item = item.added
@@ -801,6 +836,7 @@ class CopyAttributeCommand(qtw.QUndoCommand):
 
 class MainFrame(qtw.QMainWindow, AxeMixin):
     "Main application window"
+    # TODO: Make tests to improve undo&redo (See undoredowarning)
     undoredowarning = """\
     NOTE:
 
@@ -821,13 +857,13 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         self.show()
 
     # reimplemented methods from QMainWindow
-    def keyReleaseEvent(self, event):
+    def keyReleaseEvent(self, event):  # noqa N802
         "reimplemented: keyboard event handler"
         skip = self.on_keyup(event)
         if not skip:
             super().keyReleaseEvent(event)
 
-    def closeEvent(self, event):
+    def closeEvent(self, event):  # noqa N802
         """reimplemented close event handler: check if data was modified"""
         test = self.check_tree()
         if test:
@@ -835,32 +871,35 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         else:
             event.ignore()
 
-    # reimplemented methods from Mixin
+    # region reimplemented methods from Mixin
+    # mostly because of including the gui event in the signature
+
     def mark_dirty(self, state):
-        """past gewijzigd-status aan
+        """past gewijzigd-status aan (adjusts modified status)
         en stelt de overeenkomstig gewijzigde tekst voor de titel in
+        (and sets the correspondingly modified text for the title)
         """
         data = AxeMixin.mark_dirty(self, state, str(self.windowTitle()))
         if data:
             self.setWindowTitle(data)
 
-    # mostly because of including the gui event in the signature
-    ## def newxml(self, ev=None):
-    ## AxeMixin.newxml(self)
+    # def newxml(self, ev=None):
+    #     AxeMixin.newxml(self)
 
-    ## def openxml(self, ev=None):
-    ## AxeMixin.openxml(self)
+    # def openxml(self, ev=None):
+    #     AxeMixin.openxml(self)
 
-    ## def savexml(self, ev=None):
-    ## AxeMixin.savexml(self)
+    # def savexml(self, ev=None):
+    #     AxeMixin.savexml(self)
 
     def savexmlas(self):
         """save as and notify of result"""
         ok = AxeMixin.savexmlas(self)
-        if ok:
-            self.top.setText(0, self.xmlfn)
-            ## self.setWindowTitle(" - ".join((os.path.basename(self.xmlfn), TITEL)))
-            self.mark_dirty(False)
+        if not ok:
+            return
+        self.top.setText(0, self.xmlfn)
+        self.setWindowTitle(" - ".join((os.path.basename(self.xmlfn), TITEL)))
+        self.mark_dirty(False)
 
     def writexml(self):
         "(re)write tree to XML file"
@@ -898,7 +937,7 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
             "recursively add elements"
             self.item = rt
             rr = self._add_item(el.tag, el.text)
-            ## log(calculate_location(self, rr))
+            # log(calculate_location(self, rr))
             for attr in el.keys():
                 h = el.get(attr)
                 if not h:
@@ -939,7 +978,7 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
             add_to_tree(el, rt)
         # self.tree.selection = self.top
         # set_selection()
-        self.replaced = {}  # dict of nodes that have been replaced while editing
+        self.replaced = {}  # nodes that were replaced while editing
         self.mark_dirty(False)
 
     def copy(self, cut=False, retain=True):
@@ -963,7 +1002,7 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         self.undo_stack.push(command)
         if cut:
             self.mark_dirty(True)
-            ## self.tree.setCurrentItem(prev)
+            # self.tree.setCurrentItem(prev)
 
     def paste(self, before=True, pastebelow=False):
         """execute paste action"""
@@ -972,8 +1011,9 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         if self.item.parent() == self.top and not pastebelow:
             self._meldinfo("Can't paste before or after the root")
             return
-        ## data = (str(self.item.text(1)), str(self.item.text(2)))
-        log("{} {} {}".format(pastebelow, str(self.item.text(0)), self.cut_att))
+        # data = (str(self.item.text(1)), str(self.item.text(2)))
+        log("{} {} {}"
+            "".format(pastebelow, str(self.item.text(0)), self.cut_att))
         if not str(self.item.text(0)).startswith(ELSTART) and (
             pastebelow or self.cut_att
         ):
@@ -1004,7 +1044,8 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         """execute insert action"""
         if not self._checkselection():
             return
-        if str(self.item.text(0)).startswith(ELSTART) or (not before and not below):
+        if (str(self.item.text(0)).startswith(ELSTART)
+                or (not before and not below)):
             pass
         else:
             self._meldfout("Can't add element to attribute")
@@ -1024,12 +1065,18 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
             )
             self.undo_stack.push(command)
             self.mark_dirty(True)
+    # endregion reimplemented methods from Mixin
 
-    # internals
+    # region internals
+
     def _init_gui(self):
-        """Deze methode wordt aangeroepen door de __init__ van de mixin class"""
-        ## self.parent = parent
-        ## qtw.QMainWindow.__init__(self, parent) # aparte initialisatie net als voor mixin
+        """Deze methode wordt aangeroepen door de __init__ van de mixin class
+        (This method is called by the __init__ of the mixin class)
+        """
+        # self.parent = parent
+        # qtw.QMainWindow.__init__(self, parent)
+        # ^ aparte initialisatie net als voor mixin
+        #   (separate initialization just like for mixin)
         self._icon = gui.QIcon(axe_iconame)
         self.resize(620, 900)
         self.setWindowIcon(self._icon)
@@ -1080,7 +1127,8 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
                         ("Paste Under", self.paste_under, "Alt+Ctrl+V"),
                         ("Insert Attribute", self.add_attr, "Shift+Insert"),
                         ("Insert Element Before", self.insert, "Ctrl+Insert"),
-                        ("Insert Element After", self.insert_after, "Alt+Insert"),
+                        ("Insert Element After", self.insert_after,
+                         "Alt+Insert"),
                         ("Insert Element Under", self.insert_child, "Insert"),
                     ),
                     (
@@ -1106,9 +1154,11 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
                     elif ix == 3:
                         self.searchmenu_actions.append(act)
             self.undo_item, self.redo_item = self.editmenu_actions[0:2]
-            self.pastebefore_item, self.pasteafter_item, self.pasteunder_item = (
-                self.editmenu_actions[6:9]
-            )
+            (
+                self.pastebefore_item,
+                self.pasteafter_item,
+                self.pasteunder_item
+            ) = self.editmenu_actions[6:9]
             self.setundo_action = self.filemenu_actions[-2]
             self.setundo_action.setCheckable(True)
             self.setundo_action.setChecked(False)
@@ -1181,11 +1231,13 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
 
     def _ask_yesnocancel(self, prompt):
         """stelt een vraag en retourneert het antwoord
+        (asks a question and returns the answer)
         1 = Yes, 0 = No, -1 = Cancel
         """
         retval = dict(
             zip(
-                (qtw.QMessageBox.Yes, qtw.QMessageBox.No, qtw.QMessageBox.Cancel),
+                (qtw.QMessageBox.Yes, qtw.QMessageBox.No,
+                 qtw.QMessageBox.Cancel),
                 (1, 0, -1),
             )
         )
@@ -1200,7 +1252,9 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         return retval[h]
 
     def _ask_for_text(self, prompt):
-        """vraagt om tekst en retourneert het antwoord"""
+        """vraagt om tekst en retourneert het antwoord
+        (asks for text and returns the answer)
+        """
         self.in_dialog = True
         data, *_ = qtw.QInputDialog.getText(
             self, self.title, prompt, qtw.QLineEdit.Normal, ""
@@ -1225,7 +1279,9 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
 
     def _enable_pasteitems(self, active=False):
         """activeert of deactiveert de paste-entries in het menu
+        (activates or deactivates the paste entries in the menu)
         afhankelijk van of er iets te pasten valt
+        (depending on whether something can be fitted)
         """
         if active:
             self.pastebefore_item.setText("Paste Before")
@@ -1238,8 +1294,8 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
     def _checkselection(self, message=True):
         """get the currently selected item
 
-        if there is no selection or the file title is selected, display a message
-        (if requested). Also return False in that case
+        If there is no selection or the file title is selected, display
+        a message (if requested). Also return False in that case.
         """
         sel = True
         self.item = self.tree.currentItem()
@@ -1293,13 +1349,16 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         self.undo_stack.unset_undo_limit(newstate)
         if newstate:
             self._meldinfo(self.undoredowarning)
+    # endregion internals
 
-    # exposed
+    # region public
     def popupmenu(self, item):
         """call up menu"""
         log("self.popupmenu called")
         menu = self._init_menus(popup=True)
-        menu.exec_(self.tree.mapToGlobal(self.tree.visualItemRect(item).bottomRight()))
+        menu.exec_(self.tree.mapToGlobal(
+            self.tree.visualItemRect(item).bottomRight()
+        ))
 
     def quit(self):
         "close the application"
@@ -1322,8 +1381,8 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
                         else:
                             self.tree.expandItem(item)
                             self.tree.setCurrentItem(item.child(0))
-                    ## else:
-                    ## self.edit()
+                    # else:
+                    # self.edit()
                 skip = True
             elif ky == core.Qt.Key_Backspace:
                 if item.isExpanded():
@@ -1365,28 +1424,31 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         data = str(self.item.text(0))  # self.item.get_text()
         if data.startswith(ELSTART):
             tag, text = str(self.item.text(1)), str(self.item.text(2))
-            state = data, tag, text  # current values to be passed to UndoAction
+            state = data, tag, text  # current values to pass to UndoAction
             data = {"item": self.item, "tag": tag}
             if text:
                 data["data"] = True
                 data["text"] = text
-            edt = ElementDialog(self, title="Edit an element", item=data).exec_()
+            edt = ElementDialog(self, title="Edit an element",
+                                item=data).exec_()
             if edt == qtw.QDialog.Accepted:
                 h = (
                     (self.data["tag"], self.data["text"]),
                     self.ns_prefixes,
                     self.ns_uris,
                 )
-                new_state = getshortname(h), self.data["tag"], self.data["text"]
+                new_state = (getshortname(h), self.data["tag"],
+                             self.data["text"])
                 log("calling editcommand for element")
                 command = EditCommand(self, state, new_state, "Edit Element")
                 self.undo_stack.push(command)
                 self.mark_dirty(True)
         else:
             nam, val = str(self.item.text(1)), str(self.item.text(2))
-            state = data, nam, val  # current values to be passed to UndoAction
+            state = data, nam, val  # current values to pass to UndoAction
             data = {"item": self.item, "name": nam, "value": val}
-            edt = AttributeDialog(self, title="Edit an attribute", item=data).exec_()
+            edt = AttributeDialog(self, title="Edit an attribute",
+                                  item=data).exec_()
             if edt == qtw.QDialog.Accepted:
                 h = (
                     (self.data["name"], self.data["value"]),
@@ -1428,11 +1490,13 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
         edt = SearchDialog(self, title="Search options").exec_()
         if edt == qtw.QDialog.Accepted:
             self.search_next(reverse)
-            ## found, is_attr = find_next(flatten_tree(self.top), self.search_args,
-            ## reversed) # self.tree.top.child(0)
-            ## if found:
-            ## self.tree.setCurrentItem(found)
-            ## self._search_pos = (found, is_attr)
+            # found, is_attr = find_next(
+            #     flatten_tree(self.top),
+            #     self.search_args,
+            #     reversed) # self.tree.top.child(0)
+            # if found:
+            # self.tree.setCurrentItem(found)
+            # self._search_pos = (found, is_attr)
 
     def search_last(self):
         "start backwards search"
@@ -1447,7 +1511,7 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
             self.tree.setCurrentItem(found)
             self._search_pos = (found, is_attr)
         else:
-            self._meldinfo("Niks (meer) gevonden")
+            self._meldinfo(_("Niks (meer) gevonden"))
 
     def search_prev(self):
         "find backwards"
@@ -1464,6 +1528,7 @@ class MainFrame(qtw.QMainWindow, AxeMixin):
     def redo(self):
         "(re)do action"
         self.undo_stack.redo()
+    # endregion public
 
 
 def axe_gui(args):

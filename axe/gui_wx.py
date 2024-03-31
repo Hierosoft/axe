@@ -1,9 +1,14 @@
 """wxPython versie van een op een treeview gebaseerde XML-editor
+(wxPython version of a treeview-based XML editor)
 """
 
 import os
 import wx
-from .shared import ELSTART, axe_iconame, log
+from .shared import (
+    ELSTART,
+    axe_iconame,
+    # log,
+)
 
 if os.name == "nt":
     HMASK = "XML files (*.xml)|*.xml|All files (*.*)|*.*"
@@ -33,7 +38,8 @@ class ElementDialog(wx.Dialog):
         self.cmb_ns.AppendItems(self._parent.editor.ns_uris)
 
         self.cb = wx.CheckBox(self, label="Bevat data:")
-        self.txt_data = wx.TextCtrl(self, size=(300, 140), style=wx.TE_MULTILINE)
+        self.txt_data = wx.TextCtrl(self, size=(300, 140),
+                                    style=wx.TE_MULTILINE)
         self.btn_ok = wx.Button(self, id=wx.ID_SAVE)
         self.btn_ok.Bind(wx.EVT_BUTTON, self.on_ok)
         self.btn_cancel = wx.Button(self, id=wx.ID_CANCEL)
@@ -59,14 +65,16 @@ class ElementDialog(wx.Dialog):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        hsizer.Add(lbl_name, 0, wx.ALIGN_CENTER_VERTICAL | wx.LEFT | wx.RIGHT, 5)
+        hsizer.Add(lbl_name, 0, wx.ALIGN_CENTER_VERTICAL | wx.LEFT | wx.RIGHT,
+                   5)
         hsizer.Add(self.txt_tag, 1, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
-        ## hsizer.Add(hsizer2, 0, wx.EXPAND | wx.ALL, 5)
-        ## sizer.Add(hsizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.TOP,  5)
+        # hsizer.Add(hsizer2, 0, wx.EXPAND | wx.ALL, 5)
+        # sizer.Add(hsizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.TOP,  5)
         sizer.Add(hsizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.TOP, 5)
 
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        hsizer.Add(self.cb_ns, 0, wx.ALIGN_CENTER_VERTICAL)  # | wx.LEFT | wx.RIGHT, 5)
+        hsizer.Add(self.cb_ns, 0,
+                   wx.ALIGN_CENTER_VERTICAL)  # | wx.LEFT | wx.RIGHT, 5)
         hsizer.Add(self.cmb_ns, 1)  # , wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
         sizer.Add(hsizer, 0, wx.EXPAND | wx.ALL, 5)
 
@@ -81,7 +89,10 @@ class ElementDialog(wx.Dialog):
         hsizer.Add(self.btn_ok, 0, wx.EXPAND | wx.ALL, 2)
         hsizer.Add(self.btn_cancel, 0, wx.EXPAND | wx.ALL, 2)
         sizer.Add(
-            hsizer, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL, 2
+            hsizer,
+            0,
+            wx.ALL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL,
+            2
         )
 
         self.SetSizer(sizer)
@@ -177,22 +188,29 @@ class AttributeDialog(wx.Dialog):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        hsizer.Add(lbl_name, 0, wx.ALIGN_CENTER_VERTICAL | wx.LEFT | wx.RIGHT, 5)
+        hsizer.Add(lbl_name, 0, wx.ALIGN_CENTER_VERTICAL | wx.LEFT | wx.RIGHT,
+                   5)
         hsizer.Add(self.txt_name, 1, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
         sizer.Add(hsizer, 0, wx.EXPAND | wx.ALL, 5)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        hsizer.Add(self.cb_ns, 0, wx.ALIGN_CENTER_VERTICAL)  # | wx.LEFT | wx.RIGHT, 5)
+        hsizer.Add(self.cb_ns, 0,
+                   wx.ALIGN_CENTER_VERTICAL)  # | wx.LEFT | wx.RIGHT, 5)
         hsizer.Add(self.cmb_ns, 1)  # , wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
         sizer.Add(hsizer, 0, wx.EXPAND | wx.ALL, 5)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        hsizer.Add(lbl_value, 0, wx.ALIGN_CENTER_VERTICAL | wx.LEFT | wx.RIGHT, 5)
-        hsizer.Add(self.txt_value, 1, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
+        hsizer.Add(lbl_value, 0, wx.ALIGN_CENTER_VERTICAL | wx.LEFT | wx.RIGHT,
+                   5)
+        hsizer.Add(self.txt_value, 1, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT,
+                   5)
         sizer.Add(hsizer, 0, wx.EXPAND | wx.ALL, 5)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         hsizer.Add(self.btn_ok, 0, wx.EXPAND | wx.ALL, 2)
         hsizer.Add(self.btn_cancel, 0, wx.EXPAND | wx.ALL, 2)
         sizer.Add(
-            hsizer, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL, 2
+            hsizer,
+            0,
+            wx.ALL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL,
+            2
         )
 
         self.SetSizer(sizer)
@@ -241,7 +259,8 @@ class SearchDialog(wx.Dialog):
         super().__init__(parent, title=title, style=style)
         self._parent = parent
         if self._parent.editor.search_args:
-            ele_name, attr_name, attr_val, text_val = self._parent.editor.search_args
+            ele_name, attr_name, attr_val, text_val = \
+                self._parent.editor.search_args
         else:
             ele_name = attr_name = attr_val = text_val = ""
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -325,7 +344,8 @@ class SearchDialog(wx.Dialog):
         attr_name = self.txt_attr_name.GetValue()
         attr_val = self.txt_attr_val.GetValue()
         text = self.txt_text.GetValue()
-        out = self._parent.editor.get_search_text(ele, attr_name, attr_val, text)
+        out = self._parent.editor.get_search_text(ele, attr_name, attr_val,
+                                                  text)
         self.lbl_search.SetLabel("\n".join(out))
         self.Fit()
 
@@ -346,7 +366,9 @@ class SearchDialog(wx.Dialog):
         attr_val = str(self.txt_attr_val.GetValue())
         text = str(self.txt_text.GetValue())
         if not any((ele, attr_name, attr_val, text)):
-            self._parent.meldfout("Please enter search criteria or press cancel")
+            self._parent.meldfout(
+                "Please enter search criteria or press cancel"
+            )
             self.txt_element.SetFocus()
             return
 
@@ -418,13 +440,15 @@ class Gui(wx.Frame):
         return self.tree.GetItemText(node)
 
     def get_node_data(self, node):
-        "return data (element name and text/CDATA) associated with the given node"
+        "return element name and text/CDATA associated with the given node"
         return self.tree.GetItemData(node)  # assuming this is a 2-tuple
 
     def get_treetop(self):
         "return the visual tree's root element"
         top = self.tree.GetRootItem()
-        return self.tree.GetLastChild(top)  # last, so no need to check for namespaces
+        return self.tree.GetLastChild(top)
+        # ^ last, so no need to check for namespaces
+        # FIXME: Then why does get_treetop in gui_qt check for namespaces??
 
     def setup_new_tree(self, title):
         "build new visual tree and return its root element"
@@ -434,7 +458,7 @@ class Gui(wx.Frame):
         return self.top
 
     def add_node_to_parent(self, parent, pos=-1):
-        "add a new descendant to an element at the given position and return it"
+        "add new descendant to element at the given position and return it"
         if pos == -1:
             node = self.tree.AppendItem(parent, "")
         else:
@@ -456,7 +480,8 @@ class Gui(wx.Frame):
         return parent, pos
 
     def set_node_data(self, node, name, value):
-        "set the data (element name, text/CDATA) associated with the given node"
+        """set (element name, text/CDATA) associated with given node
+        """
         self.tree.SetItemData(node, (name, value))
 
     def get_selected_item(self):
@@ -468,7 +493,14 @@ class Gui(wx.Frame):
         self.tree.SelectItem(item)
 
     def is_node_root(self, item=None):
-        "check if the given element is the visual tree's root and return the result"
+        """Check if the given element is the visual tree's root.
+
+        Args:
+            item (Node ??, optional): Item to find. Defaults to self.item.
+
+        Returns:
+            bool: whether found
+        """
         if not item:
             item = self.item
         if self.tree.getItemData(item) == (
@@ -497,21 +529,25 @@ class Gui(wx.Frame):
         self.item = item
         data = self.tree.GetItemText(self.item)  # self.item.get_text()
         if data.startswith(ELSTART):
-            tag, text = self.tree.GetItemData(self.item)  # self.item.get_data()
+            # self.item.get_data()
+            tag, text = self.tree.GetItemData(self.item)
             data = {"item": self.item, "tag": tag}
             if text is not None:
                 data["data"] = True
                 data["text"] = text
-            with ElementDialog(self, title="Edit an element", item=data) as edt:
+            with ElementDialog(self, title="Edit an element",
+                               item=data) as edt:
                 if edt.ShowModal() == wx.ID_SAVE:
                     h = (self.data["tag"], self.data["text"])
-                    self.tree.SetItemText(self.item, self.editor.getshortname(h))
+                    self.tree.SetItemText(self.item,
+                                          self.editor.getshortname(h))
                     self.tree.SetItemData(self.item, h)
                     self.editor.mark_dirty(True)
         else:
             nam, val = self.tree.GetItemData(self.item)  # self.item.get_data()
             data = {"item": self.item, "name": nam, "value": val}
-            with AttributeDialog(self, title="Edit an attribute", item=data) as edt:
+            with AttributeDialog(self, title="Edit an attribute",
+                                 item=data) as edt:
                 if edt.ShowModal() == wx.ID_SAVE:
                     h = (self.data["name"], self.data["value"])
                     self.tree.SetItemText(
@@ -520,7 +556,8 @@ class Gui(wx.Frame):
                     self.tree.SetItemData(self.item, h)
                     self.editor.mark_dirty(True)
 
-    def copy(self, item, cut=False, retain=True):  # retain is t.b.v. delete functie
+    def copy(self, item, cut=False, retain=True):
+        # retain is t.b.v. delete functie
         """execute cut/delete/copy action"""
 
         def push_el(el, result):
@@ -572,7 +609,8 @@ class Gui(wx.Frame):
                 node = self.tree.AppendItem(self.item, item)
                 self.tree.SetItemData(node, data)
             else:
-                add_to = self.tree.GetItemParent(self.item)  # self.item.get_parent()
+                # self.item.get_parent()
+                add_to = self.tree.GetItemParent(self.item)
                 added = False
                 x, c = self.tree.GetFirstChild(add_to)
                 for i in range(self.tree.GetChildrenCount(add_to)):
@@ -604,7 +642,8 @@ class Gui(wx.Frame):
                 node = self.item
                 i = -1
             else:
-                node = self.tree.GetItemParent(self.item)  # self.item.get_parent()
+                # self.item.get_parent()
+                node = self.tree.GetItemParent(self.item)
                 x, c = self.tree.GetFirstChild(node)
                 cnt = self.tree.GetChildrenCount(node)
                 for i in range(cnt):
@@ -651,7 +690,9 @@ class Gui(wx.Frame):
 
     # internals
     def init_gui(self):
-        """Deze methode wordt aangeroepen door de __init__ van de mixin class"""
+        """Deze methode wordt aangeroepen door de __init__ van de mixin class
+        (This method is called by the __init__ of the mixin class)
+        """
         self.SetIcon(wx.Icon(axe_iconame, wx.BITMAP_TYPE_ICO))
         self.Bind(wx.EVT_CLOSE, self.afsl)
 
@@ -668,7 +709,7 @@ class Gui(wx.Frame):
         menu_bar.Append(searchmenu, "&Search")
         self.SetMenuBar(menu_bar)
 
-        ## self.helpmenu.append('About', callback = self.about)
+        # self.helpmenu.append('About', callback = self.about)
 
         self.tree = wx.TreeCtrl(self, size=(820, 808))  # size=(620, 808))
         self.tree.Bind(wx.EVT_LEFT_DCLICK, self.on_doubleclick)
@@ -720,7 +761,8 @@ class Gui(wx.Frame):
                 if ix == 0:
                     # if text.startswith('&Exit'):
                     #     filemenu.AppendSeparator()
-                    #     mitem = filemenu.Append(text='&Unlimited Undo', kind=wx.ITEM_CHECK)
+                    #     mitem = filemenu.Append(text='&Unlimited Undo',
+                    #                             kind=wx.ITEM_CHECK)
                     #     filemenu.AppendSeparator()
                     #     self.setundo_action = mitem
                     mitem = filemenu.Append(-1, text)
@@ -777,7 +819,8 @@ class Gui(wx.Frame):
         1 = Yes, 0 = No, -1 = Cancel
         """
         retval = dict(zip((wx.YES, wx.NO, wx.CANCEL), (1, 0, -1)))
-        h = wx.MessageBox(prompt, self.editor.title, style=wx.YES_NO | wx.CANCEL)
+        h = wx.MessageBox(prompt, self.editor.title,
+                          style=wx.YES_NO | wx.CANCEL)
         return retval[h]
 
     def ask_for_text(self, prompt, value=""):

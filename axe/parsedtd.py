@@ -1,8 +1,11 @@
-"""Voorstudie voor een DTD parser - not actively maintained
+"""Voorstudie voor een DTD parser
+(Preliminary study for a DTD parser)
+
+not actively maintained
 """
 
 # import os
-import pprint
+# import pprint
 
 PCD = "#PCDATA"
 ELSTART = "<!ELEMENT"
@@ -10,8 +13,12 @@ ATTSTART = "<!ATTLIST"
 ENTSTART = "<!ENTITY"
 END = ">"
 
+# Ignore capitalized function names
+#   (they provide objects in this case anyway):
+# noqa N802
 
-def DTDParser(**argv):
+
+def DTDParser(**argv):  # noqa N802
     return _DTDParser(**argv)._dtd
 
 
@@ -27,7 +34,7 @@ def valid_name(name):
     return True
 
 
-def Element(**argv):
+def Element(**argv):  # noqa N802
     """
     Create an element definition.
     valid keyword arguments are:
@@ -54,22 +61,29 @@ def Element(**argv):
         return _Element(**argv)
 
 
-def Attribute(parent, **argv):
+def Attribute(parent, **argv):  # noqa N802
     """
     Create an attribute definition.
-    valid keyword arguments are:
-        name (string) - the name of the attribute
-        type (string) - currently implemented: CDATA (default), ID, IDREF, IDREFS
-            do not specify for enumerated list of values
-        val (string) -  req, impl or fix; dflt or do not specify for default value
-        items (list) - one or more data values; do not specify for impl or fix
-    returns the created definition
 
     to modify afterwards, (re)assign the returned item's attributes:
-        name
-        type
-        value_type
-        value_list
+    - name
+    - type
+    - value_type
+    - value_list
+
+    Args:
+        name (str, optional): the name of the attribute
+        type (str, optional): currently implemented: CDATA (default),
+            ID, IDREF, IDREFS. Do not specify for enumerated list of
+            values.
+        val (str, optional): req, impl or fix; dflt or do not specify
+            for default value.
+        items (list, optional): one or more data values; do not specify
+            for impl or fix
+
+    Returns:
+        _Attribute: the created definition
+
     """
     child = _Attribute(**argv)
     child.parent = parent
@@ -77,40 +91,49 @@ def Attribute(parent, **argv):
     return child
 
 
-def Entity(**argv):
-    """
-    Create an entity definition.
-    valid keyword arguments are:
-        name (string) - the entity name, i.e. "nbsp" for &nbsp;
-        type (string) - 'ent' or do not specify for internal definition,
-            'ext' for external dtd
-        value (string) - the entity contents or the url to the external dtd
-    returns the created definition
+def Entity(**argv):  # noqa N802
+    """Create an entity definition.
 
     to modify afterwards, (re)assign the returned item's attributes:
         name
         type
         value
+
+    Args:
+        name (str, optional): the entity name, i.e. "nbsp" for &nbsp;
+        type (str, optional): 'ent' or do not specify for internal
+            definition, 'ext' for external dtd
+        value (str, optional): the entity contents or the url to the
+            external dtd
+
+    Returns:
+        _Entity: the created definition
     """
     child = _Entity(**argv)
-    ## child.parent = parent
-    ## parent.entity_list.append(child)
+    # child.parent = parent
+    # parent.entity_list.append(child)
     return child
 
 
-def SubItem(parent, child=None, **argv):
-    """
-    Define that a parent contains an element or attribute or entity.
-    valid keyword arguments are:
-        child (object) - the element, attribute or entity to add
-        one or more of the arguments used for Element(),
-            as a shortcut to directly add a subelement
-    returns the added or created child object
+def SubItem(parent, child=None, **argv):  # noqa N802
+    """Define that a parent contains an element or attribute or entity.
 
-    vraag:
+    vraag (test):
     (test+,(hallo*|empty)) lukt
     maar hoe krijg je (test+|(hallo*|empty)) voor elkaar
     of ((hallo*|empty)|test+)
+
+    Args:
+        child (Union(_Element, _Attribute, _Entity), optional): the
+            _Element, _Attribute or _Entity to add
+        type (str, optional): "EMPTY", "ANY", or "CDATA" (or any this is
+            valid for _Element)
+        name (str, optional): Name (used for _Element)
+        occ (str, optional): occurance (used for _Element)
+        alt (bool, optional): is_alternative (used for _Element)
+
+    Returns:
+        _Element: the added or created child object
     """
     child = Element(**argv)
     if child.is_alternative:
@@ -125,7 +148,7 @@ def SubItem(parent, child=None, **argv):
     return child
 
 
-def Text(parent, alt=False):
+def Text(parent, alt=False):  # noqa N802
     "shortcut to define that an element contains text"
     return SubItem(parent, type=PCD[2:], alt=alt, occ="")
 
@@ -135,8 +158,15 @@ class DTDParsingError(Exception):
 
 
 class _Element(object):
-    """
-    internal representation of an element definition with subordinate objects
+    """internal representation of an element definition with child objects
+
+    Args:
+        name (str, optional): Name. Defaults to None.
+        type (str, optional): "EMPTY", "ANY", or "CDATA". Defaults to
+            "ANY".
+        occ (str, optional): occurance ("1", "1-n", "0-1", "0-n").
+            Defaults to "".
+        alt (bool, optional): is_alternative. Defaults to False.
     """
 
     def __init__(self, **argv):
@@ -169,7 +199,8 @@ class _Element(object):
             data = ""
             for item in self.subelement_list:
                 if isinstance(item, _Altlist):
-                    extra = "|".join([x.name + x.occurrence for x in item._list])
+                    extra = \
+                        "|".join([x.name + x.occurrence for x in item._list])
                     extra = extra.join(("(", ")"))
                 else:
                     extra = item.name + item.occurrence
@@ -191,8 +222,7 @@ class _Element(object):
 
 
 class _Altlist(object):
-    """
-    helper structure for alternatives under an element
+    """helper for alternatives under an element
     """
 
     def __init__(self, **argv):
@@ -203,8 +233,7 @@ class _Altlist(object):
 
 
 class _Attribute(object):
-    """
-    internal representation of an attribute definition
+    """internal representation of an attribute definition
     """
 
     atttypes = (
@@ -215,7 +244,8 @@ class _Attribute(object):
         "IDREFS",
         # 'NMTOKEN', 'NMTOKENS', 'ENTITY', 'ENTITIES', 'NOTATION',
     )
-    valtypes = {"dflt": "", "req": "#REQUIRED", "impl": "#IMPLIED", "fix": "#FIXED"}
+    valtypes = {"dflt": "", "req": "#REQUIRED", "impl": "#IMPLIED",
+                "fix": "#FIXED"}
 
     def __init__(self, **argv):
         self.name = argv.get("name", None)
@@ -256,8 +286,7 @@ class _Attribute(object):
 
 
 class _Entity(object):
-    """
-    internal representation of an entity definition
+    """internal representation of an entity definition
     """
 
     def __init__(self, **argv):
@@ -324,7 +353,9 @@ class _DTDParser(object):
     def _parse(self, buffer):
         print(("buffer:", buffer))
         if buffer[:2] != "<!":
-            raise DTDParsingError("Illegal statement start at line " + str(self._line))
+            raise DTDParsingError(
+                "Illegal statement start at line " + str(self._line)
+            )
         test = buffer.split(None, 1)
         if test[0] == ELSTART:
             self._parse_element(test[1])
@@ -395,7 +426,8 @@ class _DTDParser(object):
                     print(("ix:", ix))
                     if ix == -1:
                         raise DTDParsingError(
-                            "Incorrect attribute definition:" " unbalanced parentheses"
+                            "Incorrect attribute definition:"
+                            " unbalanced parentheses"
                         )
                     enum, data = data.split(")", 1)
                     enum = enum[1:].split("|")
@@ -410,9 +442,9 @@ class _DTDParser(object):
                                 " unbalanced quotes for enum default"
                             )
                         decl = "dflt"
-                        item = data[1 : ix + 1]
+                        item = data[1:ix + 1]
                         print("item:", item)
-                        data = data[ix + 2 :].lstrip()
+                        data = data[ix + 2:].lstrip()
                         print("data:", data)
                     else:
                         decl, data = data.split(None, 1)
@@ -467,9 +499,8 @@ class _DTDParser(object):
                                 "Incorrect attribute definition:"
                                 " wrong value declaration"
                             )
-                        new = Attribute(
-                            self._dtd_dic[parent], name=name, type=type, decl=decl
-                        )
+                        new = Attribute(self._dtd_dic[parent], name=name,
+                                        type=type, decl=decl)
         except ValueError:
             raise DTDParsingError("Incorrect attribute definition")
 
@@ -478,7 +509,7 @@ class _DTDParser(object):
             name, data = inp.split(None, 1)
         except ValueError:
             raise DTDParsingError(
-                "Incomplete entity definition in line " + str(self._line)
+                "Incomplete entity definition in line {}".format(self._line)
             )
         type = ""
         if data.startswith('"') and data.endswith('"'):
@@ -509,14 +540,14 @@ class _DTDParser(object):
 
 
 def test_build_dtd():
-    ## no_1 = Element(name='top')
-    ## no_2 = SubItem(no_1,type="PCDATA")
-    ## no_3 = SubItem(no_1,name="hallo",alt=True)
-    ## no_4 = SubItem(no_1,name="empty",type='EMPTY',occ='',alt=True)
-    ## print no_1
-    ## print no_2
-    ## print no_3
-    ## print no_4
+    # no_1 = Element(name='top')
+    # no_2 = SubItem(no_1,type="PCDATA")
+    # no_3 = SubItem(no_1,name="hallo",alt=True)
+    # no_4 = SubItem(no_1,name="empty",type='EMPTY',occ='',alt=True)
+    # print no_1
+    # print no_2
+    # print no_3
+    # print no_4
     email = Element(name="email")
     sender = SubItem(email, name="from", occ="")
     Text(sender)
@@ -554,8 +585,8 @@ def test_parse_dtd():
 
 
 def main():
-    ## print test_build_dtd()
-    ## print
+    # print test_build_dtd()
+    # print
     data = test_parse_dtd()
     for item in data:
         print(str(item))

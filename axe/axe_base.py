@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 """
 XMLEdit GUI-onafhankelijke code
+(XMLEdit GUI independent code)
 """
 
 import os
 import pathlib
 
-## import sys
+# import sys
 import shutil
 
-## import copy
-import xml.etree.ElementTree as et
+# import copy
+import xml.etree.ElementTree as et  # noqa N813
 import logging
 
 ELSTART = "<>"
@@ -26,7 +27,9 @@ if LOGPLEASE:
     if not LOGFILE.exists():
         LOGFILE.touch()
     logging.basicConfig(
-        filename=str(LOGFILE), level=logging.DEBUG, format="%(asctime)s %(message)s"
+        filename=str(LOGFILE),
+        level=logging.DEBUG,
+        format="%(asctime)s %(message)s"
     )
 
 
@@ -76,7 +79,7 @@ def find_next(data, search_args, reverse=False, pos=None):
 
     if pos:
         pos, is_attr = pos
-        ## found_item = False
+        # found_item = False
         for ix, item in enumerate(data):
             if is_attr:
                 found_attr = False
@@ -92,9 +95,9 @@ def find_next(data, search_args, reverse=False, pos=None):
         if is_attr:
             data = data[ix:]
             id, name, text, attrs = data[0]
-            data[0] = id, name, text, attrs[ix2 + 1 :]
+            data[0] = id, name, text, attrs[ix2 + 1:]
         elif ix < len(data) - 1:
-            data = data[ix + 1 :]
+            data = data[ix + 1:]
         else:
             return None, False  # no more data to search
 
@@ -288,7 +291,7 @@ class AxeMixin:
 
     def writexml(self):
         "write XML back to file"
-        ## namespace_data = None   # not used
+        # namespace_data = None   # not used
         XMLTree("root").write(self.xmlfn)
 
     def about(self):

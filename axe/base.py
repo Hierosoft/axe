@@ -5,14 +5,16 @@ XMLEdit GUI-onafhankelijke code
 import os
 
 # import pathlib
-## import sys
+# import sys
 import shutil
-import xml.etree.ElementTree as et
+import xml.etree.ElementTree as et  # noqa N813
 
 # import logging
 
 from .shared import ELSTART, log
 from .gui import Gui
+
+from axe.intl import _
 
 TITEL = "Albert's (Simple) XML editor"
 NEW_ROOT = "(new root)"
@@ -29,7 +31,7 @@ def find_in_flattened_tree(data, search_args, reverse=False, pos=None):
 
     if pos:
         pos, is_attr = pos
-        ## found_item = False
+        # found_item = False
         for ix, item in enumerate(data):
             if is_attr:
                 found_attr = False
@@ -45,9 +47,9 @@ def find_in_flattened_tree(data, search_args, reverse=False, pos=None):
         if is_attr:
             data = data[ix:]
             id, name, text, attrs = data[0]
-            data[0] = id, name, text, attrs[ix2 + 1 :]
+            data[0] = id, name, text, attrs[ix2 + 1:]
         elif ix < len(data) - 1:
-            data = data[ix + 1 :]
+            data = data[ix + 1:]
         else:
             return None, False  # no more data to search
 
@@ -71,10 +73,12 @@ def find_in_flattened_tree(data, search_args, reverse=False, pos=None):
                 attr_name_ok = attr_value_ok = False
                 if not wanted_attr or wanted_attr in name:
                     attr_name_ok = True
-                    # print('attr name wanted:', wanted_attr, 'found:', attr_name_ok)
+                    # print('attr name wanted:', wanted_attr,
+                    #       'found:', attr_name_ok)
                 if not wanted_value or wanted_value in value:
                     attr_value_ok = True
-                    # print('attr value wanted:', wanted_value, 'found:', attr_value_ok)
+                    # print('attr value wanted:', wanted_value,
+                    #       'found:', attr_value_ok)
                 if attr_name_ok and attr_value_ok:
                     attr_ok = True
                     if not (wanted_ele or wanted_text):
@@ -139,9 +143,11 @@ class XMLTree:
         tree.write(fn, encoding="utf-8", xml_declaration=True)
 
 
-## class AxeMixin():
+# class AxeMixin():
 class Editor:
-    "Applicatievenster zonder GUI-specifieke methoden"
+    """Applicatievenster zonder GUI-specifieke methoden
+    (Application window without GUI specific methods)
+    """
 
     def __init__(self, fname):
         self.title = "Albert's XML Editor"
@@ -195,13 +201,15 @@ class Editor:
     def checkselection(self, message=True):
         """get the currently selected item
 
-        if there is no selection or the file title is selected, display a message
-        (if requested). Also return False in that case
+        If there is no selection or the file title is selected, display
+        a message (if requested). Also return False in that case.
         """
         sel = True
         self.item = self.gui.get_selected_item()  # self.tree.Selection
         if message and (self.item is None or self.item == self.top):
-            self.gui.meldinfo("You need to select an element or attribute first")
+            self.gui.meldinfo(
+                "You need to select an element or attribute first"
+            )
             sel = False
         return sel
 
@@ -239,7 +247,7 @@ class Editor:
         def add_to_tree(el, rt):
             "recursively add elements"
             rr = self.add_item(rt, el.tag, el.text)
-            ## log(calculate_location(self, rr))
+            # log(calculate_location(self, rr))
             for attr in el.keys():
                 h = el.get(attr)
                 if not h:
@@ -270,7 +278,10 @@ class Editor:
                 # ns_root = qtw.QTreeWidgetItem(['namespaces'])
                 namespaces = True
             ns_item = self.gui.add_node_to_parent(ns_root)
-            self.gui.set_node_title(ns_item, "{}: {}".format(prf, self.ns_uris[ix]))
+            self.gui.set_node_title(
+                ns_item,
+                "{}: {}".format(prf, self.ns_uris[ix])
+            )
         rt = self.add_item(self.top, self.rt.tag, self.rt.text)
         for attr in self.rt.keys():
             h = self.rt.get(attr)
@@ -281,7 +292,7 @@ class Editor:
             add_to_tree(el, rt)
         # self.tree.selection = self.top
         # set_selection()
-        self.replaced = {}  # dict of nodes that have been replaced while editing
+        self.replaced = {}  # nodes that have been replaced while editing
         self.gui.expand_item(self.top)
         self.mark_dirty(False)
 
@@ -310,10 +321,12 @@ class Editor:
             return ": ".join((strt, text))
         return strt
 
-    def add_item(self, to_item, name, value, before=False, below=True, attr=False):
+    def add_item(self, to_item, name, value, before=False, below=True,
+                 attr=False):
         """execute adding of item"""
         log(
-            "in add_item for {} value {} to {} before is {} below is {}".format(
+            "in add_item for {} value {} to {} before is {} below is {}"
+            "".format(
                 name, value, to_item, before, below
             )
         )
@@ -342,7 +355,8 @@ class Editor:
         return item
 
     def get_menu_data(self):
-        """return menu structure for GUI (title, callback, keyboard shortcut(s))"""
+        """return menu structure for GUI (title, callback, hotkeys(s))
+        """
         return (
             (
                 ("&New", self.newxml, "Ctrl+N"),
@@ -384,8 +398,10 @@ class Editor:
         probably nicer as a generator function
         """
         attr_list = []
-        # print('in flatten tree: node title', self.gui.get_node_title(element))
-        # print('in flatten tree: node data', self.gui.get_node_data(element))
+        # print('in flatten tree: node title',
+        #       self.gui.get_node_title(element))
+        # print('in flatten tree: node data',
+        #       self.gui.get_node_data(element))
         try:
             title, data = self.gui.get_node_data(element)
         except TypeError:
@@ -425,14 +441,14 @@ class Editor:
 
     def find_next(self, reverse=False):
         "find (default is forward)"
-        found, is_attr = find_in_flattened_tree(
-            self.flatten_tree(self.top), self.search_args, reverse, self._search_pos
-        )
+        found, is_attr = find_in_flattened_tree(self.flatten_tree(self.top),
+                                                self.search_args, reverse,
+                                                self._search_pos)
         if found:
             self.gui.set_selected_item(found)
             self._search_pos = (found, is_attr)
         else:
-            self.gui.meldinfo("Niks (meer) gevonden")
+            self.gui.meldinfo(_("Niks (meer) gevonden"))
 
     # user actions from application menu
     def newxml(self, event=None):
@@ -538,14 +554,16 @@ class Editor:
         print("in paste_before")
         if not self.checkselection():
             return
-        if self.gui.get_node_parentpos(self.item)[0] == self.gui.top and not below:
+        if ((self.gui.get_node_parentpos(self.item)[0] == self.gui.top)
+                and not below):
             if before:
                 self.gui.meldinfo("Can't paste before the root")
                 return
             else:
                 self.gui.meldinfo("Pasting as first element below root")
                 below = True
-        if below and not self.gui.get_node_title(self.item).startswith(ELSTART):
+        if below and not self.gui.get_node_title(self.item
+                                                 ).startswith(ELSTART):
             self.gui.meldinfo("Can't paste below an attribute")
             return
         self.gui.paste(self.item, before=before, below=below)
@@ -571,10 +589,12 @@ class Editor:
         "placeholder for insert before"
         if not self.checkselection():
             return
-        if self.gui.get_node_parentpos(self.item)[0] == self.gui.top and not below:
+        if ((self.gui.get_node_parentpos(self.item)[0] == self.gui.top)
+                and not below):
             self.gui.meldinfo("Can't insert before or after the root")
             return
-        if below and not self.gui.get_node_title(self.item).startswith(ELSTART):
+        if below and not self.gui.get_node_title(self.item
+                                                 ).startswith(ELSTART):
             self.gui.meldfout("Can't insert below an attribute")
             return
         self.gui.insert(self.item, before=before, below=below)
@@ -605,7 +625,8 @@ class Editor:
         value_text = " a value"
         contain_text = "   containing `{}`"
         if ele:
-            ele_out = [" an element" + has_text + name_text, contain_text.format(ele)]
+            ele_out = [" an element" + has_text + name_text,
+                       contain_text.format(ele)]
         if attr:
             attr_out = [" an attribute" + has_text]
             if attr_name:
@@ -644,4 +665,6 @@ class Editor:
 
     def about(self, event=None):
         "Credits"
-        self.gui.meldinfo("Started in 2008 by Albert Visser\nWritten in Python")
+        self.gui.meldinfo(
+            "Started in 2008 by Albert Visser\nWritten in Python"
+        )

@@ -2,13 +2,22 @@
 moet nog verder gestript net zoals dat bij de qt versie gedaan is
 """
 
-## import logging
-## logging.basicConfig(filename='axe_wx.log', level=logging.DEBUG,
-## format='%(asctime)s %(message)s')
+# import logging
+# logging.basicConfig(filename='axe_wx.log', level=logging.DEBUG,
+# format='%(asctime)s %(message)s')
 import os
 import sys
 import wx
-from .axe_base import getshortname, find_next, ELSTART, TITEL, axe_iconame, AxeMixin
+
+from axe.intl import _
+from .axe_base import (
+    getshortname,
+    find_next,
+    ELSTART,
+    TITEL,
+    axe_iconame,
+    AxeMixin,
+)
 
 TITEL = TITEL.replace("editor", "viewer")
 if os.name == "nt":
@@ -21,8 +30,9 @@ IMASK = "All files|*.*"
 def calculate_location(win, node):
     """attempt to calculate some kind of identification for a tree node
 
-    this function returns a tuple of subsequent indices of a child under its parent.
-    possibly this can be used in the replacements dictionary
+    Returns:
+        tuple: subsequent indices of a child under its parent, which
+            possibly can be used in the replacements dictionary
     """
     id_table = []
     while node != win.top:
@@ -193,7 +203,9 @@ class SearchDialog(wx.Dialog):
         attr_val = str(self.txt_attr_val.text())
         text = str(self.txt_text.text())
         if not any((ele, attr_name, attr_val, text)):
-            self._parent._meldfout("Please enter search criteria or press cancel")
+            self._parent._meldfout(
+                "Please enter search criteria or press cancel"
+            )
             self.txt_element.setFocus()
             return
 
@@ -235,9 +247,9 @@ class MainFrame(wx.Frame, AxeMixin):
             self.tree.SelectItem(item)
             menu = self._init_menus(popup=True)
             self.PopupMenu(menu)
-            ## print "klaar met menu"
+            # print("klaar met menu")
             menu.Destroy()
-        ## pass
+        # pass
 
     def on_keyup(self, ev=None):
         "event handler for keyboard"
@@ -296,8 +308,11 @@ class MainFrame(wx.Frame, AxeMixin):
 
     # internals
     def _init_gui(self):
-        """Deze methode wordt aangeroepen door de __init__ van de mixin class"""
-        wx.Frame.__init__(self, self.parent, self.id, pos=(2, 2), size=(620, 900))
+        """Deze methode wordt aangeroepen door de __init__ van de mixin class
+        (This method is called by the __init__ of the mixin class)
+        """
+        wx.Frame.__init__(self, self.parent, self.id, pos=(2, 2),
+                          size=(620, 900))
         self.SetIcon(wx.Icon(axe_iconame, wx.BITMAP_TYPE_ICO))
         self.Bind(wx.EVT_CLOSE, self.afsl)
 
@@ -339,7 +354,8 @@ class MainFrame(wx.Frame, AxeMixin):
             mitem = wx.MenuItem(filemenu, -1, "E&xit\tCtrl+Q")
             self.Bind(wx.EVT_MENU, self.quit, mitem)
             filemenu.Append(mitem)
-            # accels.append(wx.AcceleratorEntry(wx.ACCEL_CTRL, ord('Q'), 0, mitem))
+            # accels.append(wx.AcceleratorEntry(wx.ACCEL_CTRL, ord('Q'), 0,
+            #                                   mitem))
             viewmenu = wx.Menu()
 
         mitem = wx.MenuItem(viewmenu, -1, "&Expand All (sub)Levels\tCtrl++")
@@ -413,8 +429,8 @@ class MainFrame(wx.Frame, AxeMixin):
     def _checkselection(self):
         """get the currently selected item
 
-        if there is no selection or the file title is selected, display a message
-        (if requested). Also return False in that case
+        If there is no selection or the file title is selected, display
+        a message (if requested). Also return False in that case.
         """
         sel = True
         self.item = self.tree.Selection
@@ -452,11 +468,11 @@ class MainFrame(wx.Frame, AxeMixin):
             if edt == wx.ID_OK:
                 edt.accept()
                 self.search_next(reverse)
-                ## found, is_attr = find_next(flatten_tree(self.top), self.search_args,
-                ## reversed) # self.tree.top.child(0)
-                ## if found:
-                ## self.tree.setCurrentItem(found)
-                ## self._search_pos = (found, is_attr)
+                # found, is_attr = find_next(flatten_tree(self.top),
+                # self.search_args, reversed) # self.tree.top.child(0)
+                # if found:
+                # self.tree.setCurrentItem(found)
+                # self._search_pos = (found, is_attr)
 
     def search_last(self):
         "start backwards search"
@@ -471,7 +487,7 @@ class MainFrame(wx.Frame, AxeMixin):
             # self.tree.setCurrentItem(found)
             self._search_pos = (found, is_attr)
         else:
-            self._meldinfo("Niks (meer) gevonden")
+            self._meldinfo(_("Niks (meer) gevonden"))
 
     def search_prev(self):
         "find backwards"

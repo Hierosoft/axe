@@ -5,9 +5,9 @@ XMLEdit GUI-onafhankelijke code
 import os
 import pathlib
 
-## import sys
+# import sys
 # import shutil
-## import copy
+# import copy
 import logging
 
 # from axe.gui import Gui
@@ -23,7 +23,9 @@ if LOGPLEASE:
     if not LOGFILE.exists():
         LOGFILE.touch()
     logging.basicConfig(
-        filename=str(LOGFILE), level=logging.DEBUG, format="%(asctime)s %(message)s"
+        filename=str(LOGFILE),
+        level=logging.DEBUG,
+        format="%(asctime)s %(message)s",
     )
 
 

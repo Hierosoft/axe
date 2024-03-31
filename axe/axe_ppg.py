@@ -1,7 +1,12 @@
-"""XMLEdit PocketPyGUI versie - not actively maintained
+"""XMLEdit PocketPyGUI
+
+- not actively maintained
 """
 
-import os, sys, shutil, copy
+import os
+import sys
+import shutil
+# import copy
 from xml.etree.ElementTree import Element, ElementTree, SubElement
 
 ELSTART = "<>"
@@ -83,7 +88,8 @@ class ElementDialog(gui.Dialog):
         self.txtTag.select_all()
         tag = self.txtTag.selected_text.strip()
         if tag == "":
-            gui.message.ok(self._parent.title, "Element name cannot be empty or spaces")
+            gui.message.ok(self._parent.title,
+                           "Element name cannot be empty or spaces")
             return
         self._parent.data["tag"] = tag
         self._parent.data["data"] = self.cb.checked
@@ -169,7 +175,8 @@ class MainFrame(gui.CeFrame):
         self.editmenu.append_separator()
         self.editmenu.append("Cut", callback=self.cut)
         self.editmenu.append("Copy", callback=self.copy)
-        self.pastebeforeitem = self.editmenu.append("Paste Before", callback=self.paste)
+        self.pastebeforeitem = self.editmenu.append("Paste Before",
+                                                    callback=self.paste)
         self.pasteafteritem = self.editmenu.append(
             "Paste After", callback=self.paste_aft
         )
@@ -182,7 +189,7 @@ class MainFrame(gui.CeFrame):
         self.pastebeforeitem.enable(False)
         self.pasteafteritem.set_title = " "
         self.pasteafteritem.enable(False)
-        ## self.helpmenu.append('About', callback = self.about)
+        # self.helpmenu.append('About', callback = self.about)
 
         sizer = gui.VBox(border=(2, 2, 2, 2), spacing=2)
         sizer.add(self.tree)
@@ -205,7 +212,8 @@ class MainFrame(gui.CeFrame):
             self.tree.bind(lbdown=self.on_bdown)
 
     def newxml(self, ev=None):
-        h = gui.Dialog.askstring("AXE", "Enter a name (tag) for the root element")
+        h = gui.Dialog.askstring("AXE",
+                                 "Enter a name (tag) for the root element")
         if h is not None:
             self.init_tree("(untitled)")
 
@@ -239,11 +247,11 @@ class MainFrame(gui.CeFrame):
                 else:
                     root.set(name, value)
 
-        ## print self.xmlfn
+        # print(self.xmlfn)
         try:
             shutil.copyfile(self.xmlfn, self.xmlfn + ".bak")
         except IOError as mld:
-            ## print mld
+            # print(mld)
             pass
         rt = self.tree.roots[1]
         print(rt.text, rt.data)
@@ -258,7 +266,8 @@ class MainFrame(gui.CeFrame):
             self.savexmlfile()
 
     def savexmlas(self, ev=None):
-        h = gui.FileDialog.save(filename=self.xmlfn, wildcards={"XML files": "*.xml"})
+        h = gui.FileDialog.save(filename=self.xmlfn,
+                                wildcards={"XML files": "*.xml"})
         if h is not None:
             self.xmlfn = h
             self.savexmlfile()
@@ -266,7 +275,8 @@ class MainFrame(gui.CeFrame):
     def about(self, ev=None):
         gui.Message.ok(
             self.title,
-            "Made in 2008 by Albert Visser\nWritten in PythonCE and PocketPyGui",
+            ("Made in 2008 by Albert Visser"
+             "\nWritten in PythonCE and PocketPyGui"),
         )
 
     def quit(self, ev=None):
@@ -305,7 +315,8 @@ class MainFrame(gui.CeFrame):
             elif self.item is not None:
                 gui.context_menu(self, ev, self.editmenu)
             else:
-                gui.Message.ok(self.title, "You need to select a tree item first")
+                gui.Message.ok(self.title,
+                               "You need to select a tree item first")
                 # menu.append()
         else:
             ev.skip()
@@ -315,7 +326,8 @@ class MainFrame(gui.CeFrame):
         self.item = self.tree.selection
         if self.item is None or self.item == self.top:
             gui.Message.ok(
-                self.title, "You need to select an element or attribute first"
+                self.title,
+                "You need to select an element or attribute first"
             )
         return sel
 
@@ -384,7 +396,8 @@ class MainFrame(gui.CeFrame):
                 gui.Message.ok(self.title, "Can't paste before the root")
                 return
             else:
-                gui.Message.ok(self.title, "Pasting as first element below root")
+                gui.Message.ok(self.title,
+                               "Pasting as first element below root")
                 pastebelow = True
         if self.cut:
             self.pastebeforeitem.set_text = "Nothing to Paste"
@@ -410,7 +423,8 @@ class MainFrame(gui.CeFrame):
                 if not added:
                     node = add_to.append(item, data)
         else:
-            # I'd like to manipulate a complete treeitem (with subtree) here but I don't know how
+            # TODO: I'd like to manipulate a complete treeitem (with subtree)
+            #   here but I don't know how
             def zetzeronder(node, el, pos=-1):
                 item = el.get_text()
                 data = el.get_data()

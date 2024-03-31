@@ -4,5 +4,11 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"trailing-spaces.trimOnSave": true,
+		"files.trimFinalNewlines": true,
+		"flake8.args": [
+			"--ignore=N802,N806,W503"
+		]
+	}
 }

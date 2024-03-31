@@ -1,7 +1,10 @@
-"""XMLEditor Tkinter versie - not actively maintained
+"""XMLEditor Tkinter
+- not actively maintained
 """
 
-import os, sys, shutil
+import os
+import sys
+import shutil
 
 # from tkinter import *
 # from tkinter.ttk import *
@@ -33,7 +36,19 @@ else:  # except ImportError:
     # import Tix as tix
 
 
-from xml.etree.ElementTree import Element, ElementTree, SubElement
+from xml.etree.ElementTree import (
+    Element,
+    ElementTree,
+    # SubElement,
+)
+
+if __name__ == "__main__":
+    sys.path.insert(
+        0,
+        os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    )
+
+from axe.intl import _
 
 cut_obj = None
 cut_el = None
@@ -44,9 +59,6 @@ if os.name == "ce":
 else:
     DESKTOP = True
 
-## def hello():
-## print "hello!"
-
 
 def getshortname(x, attr=False):
     if attr:
@@ -55,7 +67,7 @@ def getshortname(x, attr=False):
             t = t[:-1]
     else:
         t = x.text.split("\n", 1)[0]
-    ## print t
+    # print(t)
     w = 8
     if DESKTOP:
         w = 20
@@ -79,30 +91,30 @@ def init_tree(master, root, name):
 def bepaal_xmlnode(x):  # bepaal de xml node bij een widget node
     name = x.get_label()
     h = x.widget.data
-    ## print name,x.full_id(),h
+    # print (name, x.full_id(), h)
     if len(x.full_id()) == 1:
         h = None
         ix = None
     else:
         for i in x.full_id()[1:-1]:
             h = list(h)[int(i)]
-            ## print i,h
+            # print i,h
         ix = int(x.full_id()[-1]) - len(list(h.items()))
-        ## if "=" in name: # attribuut: nog 1 nivo dieper
-        ## h = list(h)[int(x.full_id()[-1])]
-        ## ix = None
+        # if "=" in name: # attribuut: nog 1 nivo dieper
+        # h = list(h)[int(x.full_id()[-1])]
+        # ix = None
     return h, ix
 
 
-class ElementDialog(tkinter.simpledialog.Dialog):
+class ElementDialog(simpledialog.Dialog):
     def body(self, master):
         tag = ""
         txt = ""
-        self.c1 = IntVar()
+        self.c1 = tk.IntVar()
         self.c1.set(0)
         if self.parent.e12[0] is not None:
             tag = self.parent.e12[0]
-        ## if len(self.parent.e12) > 1:
+        # if len(self.parent.e12) > 1:
         if self.parent.e12[1] is not None:
             self.c1.set(1)
             txt = self.parent.e12[1]
@@ -112,26 +124,27 @@ class ElementDialog(tkinter.simpledialog.Dialog):
         if DESKTOP:
             w2 = 80
             h2 = 8
-            hfr = Frame(master)
+            hfr = ttk.Frame(master)
             hfr.pack()
-        lb = Label(hfr, text="element name:")
-        self.e1 = Entry(hfr, width=20)
-        self.e1.insert(END, tag)
+        lb = ttk.Label(hfr, text="element name:")
+        self.e1 = ttk.Entry(hfr, width=20)
+        self.e1.insert(tk.END, tag)
         if self.parent.e12[0] is not None:
-            self.e1.config(state=DISABLED)
-        self.cb = Checkbutton(hfr, text="Bevat data", variable=self.c1)
+            self.e1.config(state=tk.DISABLED)
+        self.cb = ttk.Checkbutton(hfr, text="Bevat data", variable=self.c1)
         if DESKTOP:
-            lb.pack(side=LEFT)
-            self.e1.pack(side=LEFT)
-            self.cb.pack(side=LEFT)
+            lb.pack(side=tk.LEFT)
+            self.e1.pack(side=tk.LEFT)
+            self.cb.pack(side=tk.LEFT)
         else:
             lb.pack()
             self.e1.pack()
             self.cb.pack()
 
-        Label(master, text="text data:").pack()
-        self.e2 = Text(master, width=w2, height=h2, wrap=WORD)
-        self.e2.insert(END, txt)
+        ttk.Label(master, text="text data:").pack()
+        self.e2 = ttk.Text(master, width=w2, height=h2,
+                           wrap=tk.WORD)
+        self.e2.insert(tk.END, txt)
         self.e2.pack()
 
         if self.parent.e12[0] is None:
@@ -141,14 +154,14 @@ class ElementDialog(tkinter.simpledialog.Dialog):
 
     def apply(self):
         e1 = self.e1.get()
-        e2 = self.e2.get(1.0, END)
+        e2 = self.e2.get(1.0, tk.END)
         if self.c1.get():
             self.result = e1, e2[:-1]
         else:
             self.result = e1
 
 
-class AttributeDialog(tkinter.simpledialog.Dialog):
+class AttributeDialog(simpledialog.Dialog):
     def body(self, master):
         nam, val = self.parent.e12
         w2 = 25
@@ -157,24 +170,24 @@ class AttributeDialog(tkinter.simpledialog.Dialog):
         if DESKTOP:
             w2 = 80
             h2 = 8
-            hfr = Frame(master)
+            hfr = ttk.Frame(master)
             hfr.pack()
-        lb = Label(hfr, text="attribute name:")
-        self.e1 = Entry(hfr, width=20)
+        lb = ttk.Label(hfr, text="attribute name:")
+        self.e1 = ttk.Entry(hfr, width=20)
         if self.parent.e12[0] is not None:
-            self.e1.insert(END, nam)
-            self.e1.config(state=DISABLED)
+            self.e1.insert(tk.END, nam)
+            self.e1.config(state=tk.DISABLED)
         if DESKTOP:
-            lb.pack(side=LEFT)
-            self.e1.pack(side=LEFT)
+            lb.pack(side=tk.LEFT)
+            self.e1.pack(side=tk.LEFT)
         else:
             lb.pack()
             self.e1.pack()
 
-        Label(master, text="attribute value:").pack()
-        self.e2 = Text(master, width=w2, height=h2, wrap=WORD)
+        ttk.Label(master, text="attribute value:").pack()
+        self.e2 = ttk.Text(master, width=w2, height=h2, wrap=tk.WORD)
         if self.parent.e12[1] is not None:
-            self.e2.insert(END, val)
+            self.e2.insert(tk.END, val)
         self.e2.pack()
 
         if self.parent.e12[0] is None:
@@ -184,15 +197,15 @@ class AttributeDialog(tkinter.simpledialog.Dialog):
 
     def apply(self):
         e1 = self.e1.get()
-        e2 = self.e2.get(1.0, END)
+        e2 = self.e2.get(1.0, tk.END)
         self.result = e1, e2[:-1]
 
 
-class MyNodes(Tree.Node):
+class MyNodes(ttk.Treeview.Node):
     def __init__(self, *args, **kw_args):
         # self.isElement = eljanee
         # call superclass
-        Tree.Node.__init__(*(self,) + args, **kw_args)
+        ttk.Treeview.Node.__init__(*(self,) + args, **kw_args)
         # bind right-click
         if DESKTOP:
             self.widget.tag_bind(self.symbol, "<3>", self.popup_menu)
@@ -204,12 +217,12 @@ class MyNodes(Tree.Node):
 
     # pop up menu on right click
     def popup_menu(self, event):
-        menu = Menu(self.widget, tearoff=0)
+        menu = ttk.Menu(self.widget, tearoff=0)
         menu.add_command(label="Edit", command=self.edit)
         menu.add_command(label="Cut", command=self.cut)
         if cut_obj:
             if DESKTOP:
-                pastemenu = Menu(self.widget, tearoff=False)
+                pastemenu = ttk.Menu(self.widget, tearoff=False)
                 menu.add_cascade(label="Paste", menu=pastemenu)
                 pastemenu.add_command(label="Before", command=self.paste)
                 pastemenu.add_command(label="After", command=self.paste_aft)
@@ -217,11 +230,12 @@ class MyNodes(Tree.Node):
                 menu.add_command(label="Paste Before", command=self.paste)
                 menu.add_command(label="Paste After", command=self.paste_aft)
         else:
-            menu.add_command(label="Paste", command=self.paste, state="disabled")
+            menu.add_command(label="Paste", command=self.paste,
+                             state="disabled")
         if DESKTOP:
-            insertmenu = Menu(self.widget, tearoff=False)
+            insertmenu = ttk.Menu(self.widget, tearoff=False)
             menu.add_cascade(label="Insert", menu=insertmenu)
-            elmenu = Menu(self.widget, tearoff=False)
+            elmenu = ttk.Menu(self.widget, tearoff=False)
             insertmenu.add_cascade(label="Element", menu=elmenu)
             insertmenu.add_command(label="Attribute", command=self.add_attr)
             elmenu.add_command(label="Before", command=self.ins_bef)
@@ -229,17 +243,20 @@ class MyNodes(Tree.Node):
             elmenu.add_command(label="Under", command=self.ins_chld)
         else:
             menu.add_command(label="Insert Attribute", command=self.add_attr)
-            menu.add_command(label="Insert Element Before", command=self.ins_bef)
-            menu.add_command(label="Insert Element After", command=self.ins_aft)
-            menu.add_command(label="Insert Element Under", command=self.ins_chld)
+            menu.add_command(label="Insert Element Before",
+                             command=self.ins_bef)
+            menu.add_command(label="Insert Element After",
+                             command=self.ins_aft)
+            menu.add_command(label="Insert Element Under",
+                             command=self.ins_chld)
         menu.tk_popup(event.x_root, event.y_root)
 
     def edit(self, evt=None):
         # afhankelijk van item: element of attribute dialoog
         name = self.get_label()
         if len(self.full_id()) == 1:
-            tkinter.messagebox.showwarning(
-                "Helaas...", "root element kan niet aangepast worden"
+            messagebox.showwarning(
+                _("Helaas..."), _("root element kan niet aangepast worden")
             )
             return
         if "=" in name:
@@ -263,7 +280,9 @@ class MyNodes(Tree.Node):
 
     # cut'n'paste
     def cut(self):
-        global cut_id, cut_name, cut_label, cut_expanded_icon, cut_collapsed_icon, cut_expandable_flag, cut_obj, cut_el, cut_att
+        global cut_id, cut_name, cut_label, cut_expanded_icon
+        global cut_collapsed_icon, cut_expandable_flag, cut_obj
+        global cut_el, cut_att
 
         cut_obj = 1
         cut_id = self.id
@@ -272,7 +291,7 @@ class MyNodes(Tree.Node):
         cut_expandable_flag = self.expandable_flag
         cut_name = self.get_label()
         h, ix = bepaal_xmlnode(self)  # zoek de node,
-        ## print h,ix
+        # print h,ix
         name = self.get_label()
         if " = " in name:
             cut_att = name.split(" = ", 1)
@@ -298,11 +317,12 @@ class MyNodes(Tree.Node):
                     collapsed_icon=cut_collapsed_icon,
                 )
             )
-            h = self.widget.data  #           zoek de root en
+            h = self.widget.data  # zoek de root en (find the root and)
             if cut_att is not None:
                 h.set(cutt_att[0], cut_att[1])
             elif cut_el is not None:
                 h.insert(0, cut_el)  # doe een insert(0,buffer) zeg maar
+                # (do an insert(0, buffer) so to speak)
             self.widget.data.parent.setmodified(True)
         elif before:
             self.insert_before(
@@ -314,7 +334,8 @@ class MyNodes(Tree.Node):
                     collapsed_icon=cut_collapsed_icon,
                 )
             )
-            h, ix = bepaal_xmlnode(self)  #     zoek de node index en
+            h, ix = bepaal_xmlnode(self)  # zoek de node index en
+            # (find the node index and)
             if cut_att is not None:
                 h.set(cut_att[0], cut_att[1])
             elif cut_el is not None:
@@ -330,7 +351,8 @@ class MyNodes(Tree.Node):
                     collapsed_icon=cut_collapsed_icon,
                 )
             )
-            h, ix = bepaal_xmlnode(self)  #     zoek de node index en
+            h, ix = bepaal_xmlnode(self)  # zoek de node index en
+            # (find the node index and)
             if cut_att is not None:
                 h.set(cut_att[0], cut_att[1])
             elif cut_el is not None:
@@ -428,13 +450,13 @@ class XMLTree:
             h0 = 600
             w0 = 500
         self.master = master
-        frm = Frame(master, borderwidth=5, relief=RIDGE)
-        frm.pack(fill=BOTH, expand=True)
-        sby = Scrollbar(frm, orient=VERTICAL)
-        sby.pack(side=RIGHT, fill=Y)
-        sbx = Scrollbar(frm, orient=HORIZONTAL)
-        sbx.pack(side=BOTTOM, fill=X)
-        self.tree = Tree.Tree(
+        frm = ttk.Frame(master, borderwidth=5, relief=tk.RIDGE)
+        frm.pack(fill=tk.BOTH, expand=True)
+        sby = ttk.Scrollbar(frm, orient=tk.VERTICAL)
+        sby.pack(side=tk.RIGHT, fill=tk.Y)
+        sbx = ttk.Scrollbar(frm, orient=tk.HORIZONTAL)
+        sbx.pack(side=tk.BOTTOM, fill=tk.X)
+        self.tree = ttk.Treeview.Tree(
             frm,
             height=h0,
             width=w0,
@@ -443,13 +465,13 @@ class XMLTree:
             root_id="root",
             root_label=data.tag,
             node_class=MyNodes,
-            ## drop_callback=dnd_update,
+            # drop_callback=dnd_update,
             get_contents_callback=self.getelems,
         )
         self.tree.data = data
         self.tree.data.parent = self
-        ## print self.tree.data
-        self.tree.pack(expand=True, fill=BOTH)
+        # print self.tree.data
+        self.tree.pack(expand=True, fill=tk.BOTH)
         self.tree.name = name
         self.tree.configure(yscrollcommand=sby.set)
         sby.configure(command=self.tree.yview)
@@ -461,7 +483,7 @@ class XMLTree:
     def getelems(self, node):
         h = node.full_id()
         # zoek de huidige plek in de tree
-        ## print h
+        # print h
         for x in h:
             if x == "root":
                 hier = self.tree.data
@@ -469,8 +491,10 @@ class XMLTree:
                 i = int(x)
                 hier = list(hier)[i]
         self.master.parent.currentitem = ("element", hier.tag, hier.text)
-        ## self.master.parent.editmenu.entryconfig(self.master.parent.miEditElement,state=ACTIVE)
-        ## self.master.parent.editmenu.entryconfig(self.master.parent.miEditAttribute,state=DISABLED)
+        # self.master.parent.editmenu.entryconfig(
+        #     self.master.parent.miEditElement,state=ACTIVE)
+        # self.master.parent.editmenu.entryconfig(
+        #     self.master.parent.miEditAttribute,state=DISABLED)
         for x in enumerate(list(hier.keys())):
             naam = getshortname((x[1], hier.get(x[1])), attr=True)
             idee = str(x[0])
@@ -495,11 +519,11 @@ class XMLTree:
         self.ismodified = value
         if value:
             self.master.parent.filemenu.entryconfig(
-                self.master.parent.miSave, state=ACTIVE
+                self.master.parent.miSave, state=tk.ACTIVE
             )
         else:
             self.master.parent.filemenu.entryconfig(
-                self.master.parent.miSave, state=DISABLED
+                self.master.parent.miSave, state=tk.DISABLED
             )
 
 
@@ -507,58 +531,68 @@ class MainFrame:
     def __init__(self, master, fn):
         self.master = master
         self.xmlfn = fn
-        self.frame = Frame(master)  # , width=224, height=208, bd=1
+        self.frame = ttk.Frame(master)  # , width=224, height=208, bd=1
         self.frame.parent = self
-        self.frame.pack(expand=True, fill=BOTH)
-        self.mbar = Frame(self.frame)
-        self.mbar.pack(fill=X)
+        self.frame.pack(expand=True, fill=tk.BOTH)
+        self.mbar = ttk.Frame(self.frame)
+        self.mbar.pack(fill=tk.X)
 
         # Create File menu
-        self.filebutton = Menubutton(self.mbar, text="File", padx=3, pady=2)
-        self.filebutton.pack(side=LEFT)
-        self.filemenu = Menu(self.filebutton, tearoff=0)
+        self.filebutton = ttk.Menubutton(self.mbar, text="File",
+                                         padx=3, pady=2)
+        self.filebutton.pack(side=tk.LEFT)
+        self.filemenu = ttk.Menu(self.filebutton, tearoff=0)
         self.filebutton["menu"] = self.filemenu
         # Populate File menu
         self.filemenu.add("command", label="New", command=self.newxml)
         self.filemenu.add("command", label="Open", command=self.openxml)
-        # deze optie uitgrijzen als er geen file geladen of opgebouwd  is of het is niet gewijzigd:
+        # deze optie uitgrijzen als er geen file geladen of opgebouwd is
+        #  of het is niet gewijzigd
+        #  (gray out this option if no file has been loaded or built or
+        #  it has not been modified):
         self.miSave = 2
         self.filemenu.add("command", label="Save", command=self.savexml)
-        self.filemenu.entryconfig(self.miSave, state=DISABLED)
+        self.filemenu.entryconfig(self.miSave, state=tk.DISABLED)
         # deze optie uitgrijzen als er geen file geladen of opgebouwd is
+        # (gray out this option if no file has been loaded or built up)
         self.miSaveAs = 3
         self.filemenu.add("command", label="Save As", command=self.savexmlas)
-        self.filemenu.entryconfig(self.miSaveAs, state=DISABLED)
+        self.filemenu.entryconfig(self.miSaveAs, state=tk.DISABLED)
         # deze optie actief maken als er een dtd gemaakt of gewijzigd is
-        ## self.miSaveDTD = 4
-        ## self.filemenu.add('command', label = 'Save DTD', command = self.stub)
-        ## self.filemenu.entryconfig(self.miSaveDTD,state=DISABLED)
+        # (make this option active if a dtd has been created or changed)
+        # self.miSaveDTD = 4
+        # self.filemenu.add('command', label = 'Save DTD', command=self.stub)
+        # self.filemenu.entryconfig(self.miSaveDTD,state=DISABLED)
         self.filemenu.add("command", label="Exit", command=self.quit)
 
         # Create  help menu
-        self.helpbutton = Menubutton(self.mbar, text="Help", padx=2, pady=2)
-        self.helpbutton.pack(side=RIGHT)
-        self.helpmenu = Menu(self.helpbutton, tearoff=0)
+        self.helpbutton = ttk.Menubutton(self.mbar, text="Help",
+                                         padx=2, pady=2)
+        self.helpbutton.pack(side=tk.RIGHT)
+        self.helpmenu = ttk.Menu(self.helpbutton, tearoff=0)
         self.helpbutton["menu"] = self.helpmenu
         # Populate help menu
         self.helpmenu.add("command", label="About", command=self.stub)
 
         if self.xmlfn == "":
             rt = Element("New")
-            h = tkinter.filedialog.askopenfilename(filetypes=[("XML files", "*.xml")])
+            h = filedialog.askopenfilename(filetypes=[("XML files", "*.xml")])
             if h != "":  # is not None:
                 try:
                     rt = ElementTree(file=h).getroot()
                 except:
-                    h = tkinter.messagebox.showwarning("eh...", "geen well-formed xml")
+                    h = messagebox.showwarning(
+                        "eh...",
+                        _("geen well-formed xml")
+                    )
                     rt = Element("New")
                 else:
                     self.xmlfn = h
-            ## self.openxml()
+            # self.openxml()
         else:
             rt = ElementTree(file=self.xmlfn).getroot()
         self.t1 = XMLTree(self.frame, self.xmlfn, rt)
-        self.filemenu.entryconfig(self.miSaveAs, state=ACTIVE)
+        self.filemenu.entryconfig(self.miSaveAs, state=tk.ACTIVE)
 
     def quit(self):
         self.master.destroy()
@@ -568,25 +602,28 @@ class MainFrame:
 
     def newxml(self):
         # vraag naar naam voor root element
-        h = tkinter.simpledialog.askstring(
-            "AXE", "Geef naam (tag) voor het root element op"
+        # (ask for name for root element)
+        h = simpledialog.askstring(
+            "AXE",
+            _("Geef naam (tag) voor het root element op")
         )
         if h is not None:
             init_tree(self.t1, Element(h), "(untitled)")
-            self.master.filemenu.entryconfig(self.miSaveAs, state=ACTIVE)
+            self.master.filemenu.entryconfig(self.miSaveAs, state=tk.ACTIVE)
 
     def openxml(self):
-        h = tkinter.filedialog.askopenfilename(filetypes=[("XML files", "*.xml")])
+        h = filedialog.askopenfilename(filetypes=[("XML files", "*.xml")])
         if h is not None:
-            ## print h
+            # print h
             try:
                 rt = ElementTree(file=h).getroot()
             except:
-                h = tkinter.messagebox("eh...", "parsing ging fout")
+                h = messagebox("eh...", _("parsing ging fout"))
             else:
                 init_tree(self.t1, rt, h)
                 self.xmlfn = h
-                self.master.filemenu.entryconfig(self.miSaveAs, state=ACTIVE)
+                self.master.filemenu.entryconfig(self.miSaveAs,
+                                                 state=tk.ACTIVE)
 
     def savexmlfile(self):
         print(self.xmlfn)
@@ -594,7 +631,8 @@ class MainFrame:
             shutil.copyfile(self.xmlfn, self.xmlfn + ".bak")
         except IOError as mld:
             print(mld)
-        h = ElementTree(self.t1.tree.data).write(self.xmlfn, encoding="iso-8859-1")
+        h = ElementTree(self.t1.tree.data).write(self.xmlfn,
+                                                 encoding="iso-8859-1")
 
     def savexml(self):
         if self.xmlfn == "":
@@ -603,7 +641,7 @@ class MainFrame:
             self.savexmlfile()
 
     def savexmlas(self):
-        h = tkinter.filedialog.asksaveasfilename(
+        h = filedialog.asksaveasfilename(
             filetypes=[("XML files", "*.xml")], defaultextension=".xml"
         )
         if h is not None:
@@ -612,7 +650,7 @@ class MainFrame:
 
     def editelement(self):
         self.master.eltag = self.currentitem[1]  # 'root'
-        ## self.master.currentitem[1] = ("element",hier.tag, hier.text)
+        # self.master.currentitem[1] = ("element", hier.tag, hier.text)
         self.master.eltxt = ""
         if self.currentitem[2] is not None:
             self.master.eltxt = self.currentitem[2]  # ''
@@ -625,7 +663,7 @@ class MainFrame:
 
 
 def main(inv):
-    root = Tk()
+    root = tk.Tk()
     fn = ""
     if len(inv) > 1:
         fn = inv[1]
@@ -635,5 +673,5 @@ def main(inv):
 
 
 if __name__ == "__main__":
-    ## print sys.argv
+    # print sys.argv
     main(sys.argv)

@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 """Startup script for XML viewer - intermediary for choosing a GUI toolkit
 """
 import sys
